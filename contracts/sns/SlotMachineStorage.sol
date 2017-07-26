@@ -11,10 +11,7 @@ contract SlotMachineStorage is Ownable {
 
     uint public totalNumofSlotMachine;
 
-    uint test;
-
     function SlotMachineStorage (){
-
         totalNumofSlotMachine = 0;
     }
 
@@ -23,13 +20,9 @@ contract SlotMachineStorage is Ownable {
     }
 
     function addProvider(address _provider, uint _slotnum) private {
-        if (!isValidProvider(_provider)){
+        if (slotMachines[_provider].length != 0){
           provideraddress.push(_provider);
         }
-    }
-
-    function isValidProvider(address _provider) constant returns (bool){
-        return (slotMachines[_provider].length != 0);
     }
 
     function getNumofProvider() constant returns (uint) {
@@ -37,6 +30,7 @@ contract SlotMachineStorage is Ownable {
     }
 
     function createSlotMachine (address _provider,  uint16 _decider, uint _minBet, uint _maxBet, uint16 _maxPrize)
+        onlyOwner
         returns (address)
     {
         address newslot = address(new SlotMachine(_provider, _decider, _minBet, _maxBet, _maxPrize, payStorage));
@@ -47,7 +41,7 @@ contract SlotMachineStorage is Ownable {
     }
 
     function removeSlotMachine(address _provider, uint _idx)
-      //  onlyOwner
+        onlyOwner
     {
         SlotMachine(slotMachines[_provider][_idx]).shutDown();
         delete slotMachines[_provider][_idx];
