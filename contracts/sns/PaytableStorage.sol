@@ -69,10 +69,16 @@ contract PaytableStorage is Ownable {
         return uint8(targetPayline>>252);
     }
 
+<<<<<<< HEAD
     function addPayline(uint16 _maxPrize, uint16 _targetProb, uint _a, uint _b) onlyOwner {
         payTable[_maxPrize][_targetProb][0] = _a;
         payTable[_maxPrize][_targetProb][1] = _b;
 
+=======
+    function addPayline(uint16 maxPrize, uint16 targetProb, uint a, uint b) {
+        payTable[maxPrize][targetProb][0] = a;
+        payTable[maxPrize][targetProb][1] = b;
+>>>>>>> origin/master
     }
 
 }
