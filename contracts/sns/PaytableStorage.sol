@@ -29,18 +29,6 @@ contract PaytableStorage is Ownable {
     occupation = probability * 10^10
 
     */
-    function getPaylineValue(uint16 _prize, uint16 _prob, uint8 _idx, uint8 _indicator) constant returns (uint) {
-      uint paypay;
-      uint8 ptr = (_idx <= 6) ? 0 : 1;
-      paypay = payTable[_prize][_prob][ptr];
-
-      uint8 leftwalker = (_idx <= 6) ? (_idx * 42) : ((_idx - 6) * 42);
-      uint8 rightwalker = (-_indicator + 2) * 31;
-      uint8 additionalwalker = ((_idx - 6 * ptr) - 1) * 42 + (_indicator - 1) * 11;
-
-      return (paypay << (256 - leftwalker + rightwalker)) >> (256 - leftwalker + rightwalker + additionalwalker);
-    }
-
 
     function PaytableStorage() {
         payTable[1000][100][0] = 0xb006a57b219002c5f4e04b016d5b8c0c8139cfcc81919107c0a02958739a9805;
@@ -77,8 +65,8 @@ contract PaytableStorage is Ownable {
     }
 
     function getNumofPayline(uint16 _prize, uint16 _prob) constant returns (uint8) {
-        uint paypay = payTable[_prize][_prob][0];
-        return uint8(paypay>>252);
+        uint targetPayline = payTable[_prize][_prob][0];
+        return uint8(targetPayline>>252);
     }
 
     function addPayline(uint16 _maxPrize, uint16 _targetProb, uint _a, uint _b) onlyOwner {

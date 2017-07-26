@@ -257,15 +257,15 @@ contract SlotMachine is Ownable {
 
 
     function getPayline(uint8 _idx, uint8 _indicator) constant returns (uint) {
-        uint paypay;
+        uint targetPayline;
         uint8 ptr = (_idx <= 6) ? 0 : 1;
-        paypay = payTable[ptr];
+        targetPayline = payTable[ptr];
 
         uint8 leftwalker = (_idx <= 6) ? (_idx * 42) : ((_idx - 6) * 42);
         uint8 rightwalker = (-_indicator + 2) * 31;
         uint8 additionalwalker = ((_idx - 6 * ptr) - 1) * 42 + (_indicator - 1) * 11;
 
-        return (paypay << (256 - leftwalker + rightwalker)) >> (256 - leftwalker + rightwalker + additionalwalker);
+        return (targetPayline << (256 - leftwalker + rightwalker)) >> (256 - leftwalker + rightwalker + additionalwalker);
 
   	}
 
