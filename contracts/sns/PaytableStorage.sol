@@ -67,6 +67,5 @@ contract PaytableStorage {
     function addPayline(uint16 maxPrize, uint16 targetProb, uint a, uint b) {
         payTable[maxPrize][targetProb][0] = a;
         payTable[maxPrize][targetProb][1] = b;
-
     }
 }
