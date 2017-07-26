@@ -188,7 +188,6 @@ contract SlotMachine is Ownable {
     }
 
     function shutDown()
-        /*onlyOwner*/
         notOccupied
         onlyAvailable
         notPlaying
