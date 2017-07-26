@@ -150,6 +150,7 @@ contract SlotMachine is Ownable {
 
         mPlayer = msg.sender;
         playerBalance += msg.value;
+        mAvailable = false;
 
         previousPlayerSeed = _playerSeed;
 
@@ -187,8 +188,7 @@ contract SlotMachine is Ownable {
     }
 
     function shutDown()
-
-    //    onlyOwner
+        onlyOwner
         notOccupied
         onlyAvailable
         notPlaying
@@ -257,15 +257,15 @@ contract SlotMachine is Ownable {
 
 
     function getPayline(uint8 _idx, uint8 _indicator) constant returns (uint) {
-      uint paypay;
-      uint8 ptr = (_idx <= 6) ? 0 : 1;
-      paypay = payTable[ptr];
+        uint paypay;
+        uint8 ptr = (_idx <= 6) ? 0 : 1;
+        paypay = payTable[ptr];
 
-      uint8 leftwalker = (_idx <= 6) ? (_idx * 42) : ((_idx - 6) * 42);
-      uint8 rightwalker = (-_indicator + 2) * 31;
-      uint8 additionalwalker = ((_idx - 6 * ptr) - 1) * 42 + (_indicator - 1) * 11;
+        uint8 leftwalker = (_idx <= 6) ? (_idx * 42) : ((_idx - 6) * 42);
+        uint8 rightwalker = (-_indicator + 2) * 31;
+        uint8 additionalwalker = ((_idx - 6 * ptr) - 1) * 42 + (_indicator - 1) * 11;
 
-      return (paypay << (256 - leftwalker + rightwalker)) >> (256 - leftwalker + rightwalker + additionalwalker);
+        return (paypay << (256 - leftwalker + rightwalker)) >> (256 - leftwalker + rightwalker + additionalwalker);
 
   	}
 
