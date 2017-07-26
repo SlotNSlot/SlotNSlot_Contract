@@ -40,13 +40,16 @@ contract SlotMachineStorage is Ownable {
         return newslot;
     }
 
-    function removeSlotMachine(address _provider, uint _idx)
+    function removeSlotMachine(address _provider, address _slotaddr)
         onlyOwner
     {
-        SlotMachine(slotMachines[_provider][_idx]).shutDown();
-        delete slotMachines[_provider][_idx];
+        SlotMachine(_slotaddr).shutDown();
         slotMachines[_provider].length--;
         totalNumofSlotMachine--;
+    }
+
+    function deleteSlotMachineinArray(address _provider, uint _idx) {
+        delete slotMachines[_provider][_idx];
     }
 
     function setSlotMachine(address _provider, uint _idx, address _newslotMachine)
