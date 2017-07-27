@@ -30,7 +30,7 @@ contract SlotMachineStorage is Ownable {
     }
 
     function createSlotMachine (address _provider,  uint16 _decider, uint _minBet, uint _maxBet, uint16 _maxPrize)
-        onlyOwner
+        /*onlyOwner*/
         returns (address)
     {
         address newslot = address(new SlotMachine(_provider, _decider, _minBet, _maxBet, _maxPrize, payStorage));
@@ -41,7 +41,7 @@ contract SlotMachineStorage is Ownable {
     }
 
     function removeSlotMachine(address _provider, address _slotaddr)
-        onlyOwner
+        /*onlyOwner*/
     {
         SlotMachine(_slotaddr).shutDown();
         slotMachines[_provider].length--;

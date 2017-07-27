@@ -1,27 +1,27 @@
-#SlotMachine API
+#SlotMachine API 0.1v
 
 ---
+General
+
+  - removing slotmachine bug fixed
+
+
 SlotMachine
   - event gameOccupied changed  
     gameOccupied(address player, uint playerBalance) => (address player, uint playerSeed)
 
+  - *getInfo*() added
 
----
-General
-  - reduced gas usage on playing game, creating slotmachine
-  - applied paytablestorage, all combinations of (maxprize, decider) are available  
+  - *occupy*(bytes32 _playerSeed) =>  *occupy*(bytes32[3] _playerSeed)
 
+  - *initProviderSeed*(bytes32 _providerSeed) => *initProviderSeed*(bytes32[3] _providerSeed)
 
-SlotMachineManager
-  - event slotMachineCreated :  parameter maxPrize added
-  - removeSlotMachine : refunding to owner added  
+  - *initGameforPlayer*(uint _bet, uint _lines) => *initGameforPlayer*(uint _bet, uint _lines, uint _idx)
 
-SlotMachine
-  - Game struct changed
-  - function *checksha, checkseed* deleted
-  - event gameConfirmed changed,  
-    gameConfirmed(bytes32 gameid, uint reward) => gameConfirmed(uint reward)
-  - initGameforPlayer, setProviderSeed, setPlayerSeed does *not* have to be sent to contract in proper order
+  - *setProviderSeed*(bytes32 _providerSeed) => *setProviderSeed*(bytes32 _providerSeed, uint _idx)
+
+  - *setPlayerSeed*(bytes32 _playerSeed) => *setPlayerSeed*(bytes32 _playerSeed, uint _idx)
+
 
 ---
 ## SlotMachineManager
@@ -127,11 +127,6 @@ SlotMachine
 
   - uint mMaxPrize
 
-  - bool mIsGamePlaying;
-
-    true if game is initialized by initGameforPlayer, until game is confirmed by setPlayerSeed
-    after gameConfirmed event triggered, it is set false;
-
   - uint providerBalance
 
     provider's balance in slotmachine (wei)
@@ -140,13 +135,6 @@ SlotMachine
 
     player's balance in slotmachine (wei)
 
-  - bytes32 previousPlayerSeed
-
-    stores playerseed of the previous game
-
-  - bytes32 previousProviderSeed
-
-    stores providerseed of the previous game
 
   - bool public initialPlayerSeedReady
 
@@ -156,66 +144,59 @@ SlotMachine
 
     true if initial provider seed is set by *setProviderSeed*
 
-  - mapping (address => uint) public mNumGamePlayedByUser;
+  - betReady[3]
 
-    increased if game is initialized by *initGameforPlayer*
 
-  - mapping (bytes32 => bool) public mUsedPlayerSeeds;
+  - providerSeedReady[3]
 
-  - bytes32 mCurrentGameId;
+  - playerSeedReady[3]
 
-    stores current game id, which is set in *initGameforPlayer*  
+  - bytes32[3] previousPlayerSeed
 
-  - Game mGames[bytes32 gameid];
+    stores playerseed of the previous game
+
+  - bytes32[3] previousProviderSeed
+
+    stores providerseed of the previous game
+
+
+  - Game[3] mGames;
 
     stores game information for each round  
 
     ```solidity
     struct Game {
-        GameState gameState;
-        address player;
         uint bet;
         bytes32 providerSeed;
-        uint providerNumber;
         bytes32 playerSeed;
-        uint playerNumber;
         uint randomNumber;
         bool providerSeedReady;
         bool playerSeedReady;
         uint numofLines;
         uint reward;
     }
-
-    enum GameState {
-        INITIALIZED,  //initGameforPlayer()
-        PROVIDERSEEDSET,  //setProviderSeed()
-        PLAYERSEEDSET,  //setPlayerSeed()
-        END //gameConfirmed;
-    }
     ```
 
   - all public variables have getter function
     ```js
       //get game informations in struct Game
-      gameid = slot.mCurrentGameId();
-      slot.mGames(gameid);
-
-      //get current game id
-      slot.mCurrentGameId();
+      slot.mGames(0);
 
       //get player balance
       slot.playerBalance();
 
-      //get number of games played by user
-      slot.mNumGamePlayedByUser(useraddress);
       ...
     ```
 
 
 ### methods
 
+  - getInfo() constant returns (uint16, uint, uint, uint16, uint)  
 
-  - occupy(bytes32 _playerSeed)
+    return (mDecider, mMinBet, mMaxBet, mMaxPrize, providerBalance);
+
+
+  - occupy(bytes32[3] _playerSeed)
 
     player enters the game  
     send ether  
@@ -223,19 +204,19 @@ SlotMachine
     set initial player seed with _playerSeed  
     event : gameOccupied
 
-  - initProviderSeed(bytes32 _providerSeed)  
+  - initProviderSeed(bytes32[3] _providerSeed)  
 
     set initial provider seed  
     event : providerSeedInitialized
 
-  - initGameforPlayer(uint _bet, uint _lines)
+  - initGameforPlayer(uint _bet, uint _lines, uint _idx)
 
     start slot game with parameters  
     event : gameInitialized
 
     if game is set properly, trigger event : gameConfirmed
 
-  - setProviderSeed(bytes32 _providerSeed)
+  - setProviderSeed(bytes32 _providerSeed, uint _idx)
 
     onlyProvider  
     set current game seed for provider  
@@ -243,11 +224,10 @@ SlotMachine
 
     if game is set properly, trigger event : gameConfirmed
 
-  - setPlayerSeed(bytes32 _playerSeed)
+  - setPlayerSeed(bytes32 _playerSeed, uint _idx)
 
     onlyPlayer  
     set current game seed for player  
-    play confirm, caculate the game  
     event : playerSeedSet
 
     if game is set properly, trigger event : gameConfirmed
@@ -312,19 +292,28 @@ web3.eth.sendTransaction({from:provider, to:slotaddr, value : web3.toWei(1,"ethe
 slot.providerBalance()
 
 //player occupies the slotmachine, send ether
- slot.occupy('0x11',{from:player,value:web3.toWei(2,"ether")})
+var playerseeds = new Array(seed1,seed2,seed3)
+slot.occupy(playerseeds,{from:player,value:web3.toWei(2,"ether")})
 
 //set initial provider seed
-slot.initProviderSeed('0x22')
+var providerseeds = new Array(seed4,seed5,seed6)
+slot.initProviderSeed(providerseeds)
 
-//player press button 'play'
-slot.initGameforPlayer(500,20,{from:user2})
+//player press button 'play' with chain_0;
+slot.initGameforPlayer(500,20,0,{from:user2})
 
 //provider sets seed for current game
-slot.setProviderSeed('0x99')
+slot.setProviderSeed(seed,0,{from:provider})
 
 //player sets seed for current game, caculate reward
-slot.setPlayerSeed('0x88',{from:user2})
+slot.setPlayerSeed(seed,0,{from:player})
+
+//player press button 'play' with chain_1, order of transaction does not matter;
+slot.initGameforPlayer(500,20,1,{from:user2})
+
+slot.setPlayerSeed(seed,1,{from:player})
+
+slot.setProviderSeed(seed,1,{from:provider})
 
 
 

@@ -1,16 +1,15 @@
- // var MetaCoin = artifacts.require("./MetaCoin.sol");
 var SlotMachineStorage = artifacts.require("./sns/SlotMachineStorage.sol");
 var SlotMachineManager = artifacts.require("./sns/SlotMachineManager.sol");
 var SlotLib = artifacts.require("./sns/SlotLib.sol");
 var SlotLib2 = artifacts.require("./sns/SlotLib2.sol");
 var Dispatcher = artifacts.require("./Dispatcher.sol");
 var DispatcherStorage = artifacts.require("./DispatcherStorage.sol");
-// var SlotMachine = artifacts.require("./sns/SlotMachine.sol");
+var SlotMachine = artifacts.require("./sns/SlotMachine.sol");
 var PaytableStorage = artifacts.require("./sns/PaytableStorage.sol");
 
 module.exports = function(deployer) {
 
-  //deployer.deploy(MetaCoin);
+  // deployer.deploy(MetaCoin);
 
     deployer.deploy(SlotLib).then(function() {
       console.log('SlotLib address : ', SlotLib.address);
@@ -46,9 +45,9 @@ module.exports = function(deployer) {
         })
       });
     });
-    // deployer.deploy(PaytableStorage);
+    deployer.deploy(PaytableStorage);
 
-    // deployer.deploy(SlotMachine,'0x551c8a4403eb796ae72b9f144a5934d7903684dc',150,100,10000,1000);
+    // deployer.deploy(SlotMachine,'0xaa72f9eaf13f6d1152a2d190eec9b10aeb7bc33c',150,100,10000,1000,'0x0');
     // deployer.deploy(SlotMachineStorage);
     // deployer.deploy(SlotLib2).then(function() {
     //   console.log('SlotLib2 address : ', SlotLib2.address);
