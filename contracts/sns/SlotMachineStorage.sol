@@ -9,6 +9,7 @@ contract SlotMachineStorage is Ownable {
     address[] public provideraddress;
     mapping (address => address[]) public slotMachines;
 
+
     uint public totalNumofSlotMachine;
 
     function SlotMachineStorage (){
@@ -48,7 +49,9 @@ contract SlotMachineStorage is Ownable {
         totalNumofSlotMachine--;
     }
 
-    function deleteSlotMachineinArray(address _provider, uint _idx) {
+    function deleteSlotMachineinArray(address _provider, uint _idx)
+
+    {
         delete slotMachines[_provider][_idx];
     }
 

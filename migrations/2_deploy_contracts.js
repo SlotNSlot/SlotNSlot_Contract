@@ -45,7 +45,7 @@ module.exports = function(deployer) {
         })
       });
     });
-    deployer.deploy(PaytableStorage);
+    // deployer.deploy(PaytableStorage);
 
     // deployer.deploy(SlotMachine,'0xaa72f9eaf13f6d1152a2d190eec9b10aeb7bc33c',150,100,10000,1000,'0x0');
     // deployer.deploy(SlotMachineStorage);

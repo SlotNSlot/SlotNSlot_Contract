@@ -35,7 +35,7 @@ contract SlotMachine is Ownable {
         uint bet;
         bytes32 providerSeed;
         bytes32 playerSeed;
-        uint randomNumber;
+        /*uint randomNumber;*/
         bool providerSeedReady;
         bool playerSeedReady;
         uint numofLines;
@@ -76,14 +76,14 @@ contract SlotMachine is Ownable {
     event playerLeft(address player, uint playerBalance);
     event providerLeft(address provider);
 
-    event gameOccupied(address player, bytes32 playerSeed);
-    event providerSeedInitialized(bytes32 providerSeed);
+    event gameOccupied(address player, bytes32[3] playerSeed);
+    event providerSeedInitialized(bytes32[3] providerSeed);
 
-    event gameInitialized(address player, uint bet, uint lines);
-    event providerSeedSet(bytes32 providerSeed);
-    event playerSeedSet(bytes32 playerSeed);
+    event gameInitialized(address player, uint bet, uint lines, uint idx);
+    event providerSeedSet(bytes32 providerSeed, uint idx);
+    event playerSeedSet(bytes32 playerSeed, uint idx);
 
-    event gameConfirmed(uint reward);
+    event gameConfirmed(uint reward, uint idx);
 
     function () payable {
       if (msg.sender == owner || tx.origin == owner) {
@@ -130,18 +130,18 @@ contract SlotMachine is Ownable {
 
         mPlayer = msg.sender;
         playerBalance += msg.value;
-        mAvailable = true;
+        mAvailable = false;
         previousPlayerSeed[0] = _playerSeed[0];
         previousPlayerSeed[1] = _playerSeed[1];
         previousPlayerSeed[2] = _playerSeed[2];
 
         initialPlayerSeedReady = true;
-        gameOccupied(mPlayer, _playerSeed[0]);
+        gameOccupied(mPlayer, _playerSeed);
     }
 
     function initProviderSeed(bytes32[3] _providerSeed)
         onlyOwner
-        onlyAvailable
+        /*onlyAvailable*/
     {
         /*require(initialPlayerSeedReady);*/
         previousProviderSeed[0] = _providerSeed[0];
@@ -149,7 +149,7 @@ contract SlotMachine is Ownable {
         previousProviderSeed[2] = _providerSeed[2];
 
         initialProviderSeedReady = true;
-        providerSeedInitialized(_providerSeed[0]);
+        providerSeedInitialized(_providerSeed);
     }
 
     function leave()
@@ -177,7 +177,7 @@ contract SlotMachine is Ownable {
     }
 
     function initGameforPlayer(uint _bet, uint _lines, uint _idx)
-        onlyAvailable
+        /*onlyAvailable*/
         onlyPlayer
         notBankrupt
     {
@@ -196,7 +196,7 @@ contract SlotMachine is Ownable {
         providerBalance += _bet * _lines;
 
         betReady[_idx] = true;
-        gameInitialized(mPlayer, _bet, _lines);
+        gameInitialized(mPlayer, _bet, _lines, _idx);
 
         if (betReady[_idx] && providerSeedReady[_idx] && playerSeedReady[_idx]){
           confirmGame(_idx);
@@ -206,13 +206,14 @@ contract SlotMachine is Ownable {
 
     function setProviderSeed(bytes32 _providerSeed, uint _idx)
         onlyOwner
-        onlyAvailable
+        /*onlyAvailable*/
     {
+        /*require(previousProviderSeed[_idx] == _providerSeed);*/
 
         mGame[_idx].providerSeed = _providerSeed;
         mGame[_idx].providerSeedReady = true;
         providerSeedReady[_idx] = true;
-        providerSeedSet(_providerSeed);
+        providerSeedSet(_providerSeed, _idx);
 
         if (betReady[_idx] && providerSeedReady[_idx] && playerSeedReady[_idx]){
           confirmGame(_idx);
@@ -223,12 +224,14 @@ contract SlotMachine is Ownable {
 
     function setPlayerSeed(bytes32 _playerSeed, uint _idx)
         onlyPlayer
-        onlyAvailable
+        /*onlyAvailable*/
     {
+        /*require(previousPlayerSeed[_idx] == _playerSeed);*/
+
         mGame[_idx].playerSeed = _playerSeed;
         mGame[_idx].playerSeedReady = true;
         playerSeedReady[_idx] = true;
-        playerSeedSet(_playerSeed);
+        playerSeedSet(_playerSeed, _idx);
 
         if (betReady[_idx] && providerSeedReady[_idx] && playerSeedReady[_idx]){
           confirmGame(_idx);
@@ -274,7 +277,7 @@ contract SlotMachine is Ownable {
         }
         reward = reward * mGame[_idx].bet;
 
-        mGame[_idx].randomNumber = randomNumber;
+        /*mGame[_idx].randomNumber = randomNumber;*/
         mGame[_idx].reward = reward;
 
         providerBalance -= reward;
@@ -282,7 +285,7 @@ contract SlotMachine is Ownable {
 
         previousProviderSeed[_idx] = mGame[_idx].providerSeed;
         previousPlayerSeed[_idx] = mGame[_idx].playerSeed;
-        gameConfirmed(reward);
+        gameConfirmed(reward, _idx);
 
         betReady[_idx] = false;
         providerSeedReady[_idx] = false;

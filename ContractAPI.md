@@ -1,6 +1,17 @@
-#SlotMachine API 0.1v
+#SlotMachine API 0.11v
+
 
 ---
+0.11
+
+  - event gameOccupied, providerSeedInitialized, gameInitialized, setProviderSeed, setPlayerSeed, gameConfirmed parameters changed
+
+  - game struct changed
+
+
+---
+0.1
+
 General
 
   - removing slotmachine bug fixed
@@ -169,7 +180,6 @@ SlotMachine
         uint bet;
         bytes32 providerSeed;
         bytes32 playerSeed;
-        uint randomNumber;
         bool providerSeedReady;
         bool playerSeedReady;
         uint numofLines;
@@ -242,6 +252,8 @@ SlotMachine
 
 
 ### events
+
+
   - playerLeft(address player, uint playerBalance)  
     - player : address of player
     - playerBalance : balance of initial balance
@@ -251,31 +263,35 @@ SlotMachine
     - provider : address of provider
 
 
-  - gameOccupied(address player, bytes32 playerSeed)
+  - gameOccupied(address player, bytes32[3] playerSeed)
     - player : address of player
     - playerSeed : initial playerSeed
 
 
-  - providerSeedInitialized(bytes32 providerSeed)
+  - providerSeedInitialized(bytes32[3] providerSeed)
     - providerSeed : initial seed for provider
 
 
-  - gameInitialized(address player, uint bet, uint lines)
+  - gameInitialized(address player, uint bet, uint lines, uint idx)
     - player : address of player
     - bet : current game bet
     - lines : current game lines
+    - idx : index of sha3chain
 
 
-  - providerSeedSet(bytes32 providerSeed)
+  - providerSeedSet(bytes32 providerSeed, uint idx)
     - providerSeed : current game seed for provider
+    - idx : index of sha3chain
 
 
-  - playerSeedSet(bytes32 playerSeed)
+  - playerSeedSet(bytes32 playerSeed, uint idx)
     - playerSeed : current game seed for provider
+    - idx : index of sha3chain
 
 
-  - gameConfirmed(uint reward)
+  - gameConfirmed(uint reward, uint idx)
     - reward : final reward for player  
+    - idx : index of sha3chain
 
 
 
