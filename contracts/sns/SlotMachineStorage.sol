@@ -3,6 +3,7 @@ pragma solidity ^0.4.0;
 
 import 'zeppelin-solidity/contracts/ownership/Ownable.sol';
 import "./SlotMachine.sol";
+import './PaytableStorage.sol';
 
 contract SlotMachineStorage is Ownable {
     address public payStorage;
@@ -34,7 +35,10 @@ contract SlotMachineStorage is Ownable {
         /*onlyOwner*/
         returns (address)
     {
-        address newslot = address(new SlotMachine(_provider, _decider, _minBet, _maxBet, _maxPrize, payStorage));
+        uint[2] memory payTable = PaytableStorage(payStorage).getPayline(_maxPrize,_decider);
+        uint8 numOfPayLine = PaytableStorage(payStorage).getNumofPayline(_maxPrize,_decider);
+
+        address newslot = address(new SlotMachine(_provider, _decider, _minBet, _maxBet, _maxPrize, payTable, numOfPayLine));
         addProvider(_provider, 1);
         slotMachines[_provider].push(newslot);
         totalNumofSlotMachine++;
