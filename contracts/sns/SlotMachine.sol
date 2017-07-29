@@ -269,6 +269,7 @@ contract SlotMachine is Ownable {
     }
 
     function getInfo() constant returns (uint16, uint, uint, uint16, uint) {
+      //todo : add return values
         return (mDecider, mMinBet, mMaxBet, mMaxPrize, providerBalance);
     }
 }

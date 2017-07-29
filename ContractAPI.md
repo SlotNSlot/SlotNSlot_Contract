@@ -4,6 +4,7 @@
 ---
 0.11
 
+General
   - event gameOccupied, providerSeedInitialized, gameInitialized, setProviderSeed, setPlayerSeed, gameConfirmed parameters changed
 
   - game struct changed
@@ -60,7 +61,7 @@ SlotMachine
 
 
 ###events
-  - slotMachineCreated (address _provider, uint _decider, uint _minBet, uint _maxBet, uint _maxPrize, uint _totalnum, address _slotaddr)  
+  - slotMachineCreated (address _provider, uint16 _decider, uint _minBet, uint _maxBet, uint16 _maxPrize, uint _totalnum, address _slotaddr)  
 
     arguments :  
 
@@ -158,13 +159,6 @@ SlotMachine
   - bool public initialProviderSeedReady
 
     true if initial provider seed is set by *setProviderSeed*
-
-  - betReady[3]
-
-
-  - providerSeedReady[3]
-
-  - playerSeedReady[3]
 
   - bytes32[3] previousPlayerSeed
 

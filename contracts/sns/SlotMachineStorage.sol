@@ -22,7 +22,7 @@ contract SlotMachineStorage is Ownable {
     }
 
     function addProvider(address _provider, uint _slotnum) private {
-        if (slotMachines[_provider].length != 0){
+        if (slotMachines[_provider].length == 0){
           provideraddress.push(_provider);
         }
     }
