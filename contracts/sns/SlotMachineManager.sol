@@ -15,8 +15,8 @@ contract SlotMachineManager {
         _;
     }
 
-    event slotMachineCreated(address _provider, uint16 _decider, uint _minBet, uint _maxBet, uint16 _maxPrize, uint _totalnum, address _slotaddr);
-    event slotMachineRemoved(address _provider, address _slotaddr, uint _totalnum);
+    event slotMachineCreated(address _banker, uint16 _decider, uint _minBet, uint _maxBet, uint16 _maxPrize, uint _totalnum, address _slotaddr);
+    event slotMachineRemoved(address _banker, address _slotaddr, uint _totalnum);
 
     function SlotMachineManager (address _storageaddr) {
         slotmachineStorage = _storageaddr;

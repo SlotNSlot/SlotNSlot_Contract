@@ -1,11 +1,31 @@
-#SlotMachine API 0.11v
+#SlotMachine API 0.12v
+
+---
+0.12
+
+General
+
+  - provider => banker
+  - Provider => Banker
+  - of => Of, for => For (applying camelcase)
+
+SlotMachineStorage
+
+  - getNumofSlotMachine => getNumOfSlotMachine
+  - totalNumofSlotMachine => totalNumOfSlotMachine
+  - getNumofProvider => getNumOfProvider => getNumOfBanker
 
 
+SlotMachine
+
+  - initGameforPlayer => initGameForPlayer
+  - game struct  
+    numofLines => numOfLines
 ---
 0.11
 
 General
-  - event gameOccupied, providerSeedInitialized, gameInitialized, setProviderSeed, setPlayerSeed, gameConfirmed parameters changed
+  - event gameOccupied, bankerSeedInitialized, gameInitialized, setBankerSeed, setPlayerSeed, gameConfirmed parameters changed
 
   - game struct changed
 
@@ -14,7 +34,7 @@ SlotMachine
   - mAvailable : true if slot is not occupied by player, false if slot is occupied
 
 ---
-0.1
+0.10
 
 General
 
@@ -29,11 +49,11 @@ SlotMachine
 
   - *occupy*(bytes32 _playerSeed) =>  *occupy*(bytes32[3] _playerSeed)
 
-  - *initProviderSeed*(bytes32 _providerSeed) => *initProviderSeed*(bytes32[3] _providerSeed)
+  - *initBankerSeed*(bytes32 _bankerSeed) => *initBankerSeed*(bytes32[3] _bankerSeed)
 
-  - *initGameforPlayer*(uint _bet, uint _lines) => *initGameforPlayer*(uint _bet, uint _lines, uint _idx)
+  - *initGameForPlayer*(uint _bet, uint _lines) => *initGameForPlayer*(uint _bet, uint _lines, uint _idx)
 
-  - *setProviderSeed*(bytes32 _providerSeed) => *setProviderSeed*(bytes32 _providerSeed, uint _idx)
+  - *setBankerSeed*(bytes32 _bankerSeed) => *setBankerSeed*(bytes32 _bankerSeed, uint _idx)
 
   - *setPlayerSeed*(bytes32 _playerSeed) => *setPlayerSeed*(bytes32 _playerSeed, uint _idx)
 
@@ -52,7 +72,7 @@ SlotMachine
 - removeSlotMachine(uint _idx)
 
   remove slotmachine[_idx] from slotmachine array, rest of arrays will be sorted automatically
-  refund slotmachine's deposit to provider
+  refund slotmachine's deposit to banker
   event : slotMachineRemoved
 
 - getStorageAddr() returns (address)
@@ -61,19 +81,19 @@ SlotMachine
 
 
 ###events
-  - slotMachineCreated (address _provider, uint16 _decider, uint _minBet, uint _maxBet, uint16 _maxPrize, uint _totalnum, address _slotaddr)  
+  - slotMachineCreated (address _banker, uint16 _decider, uint _minBet, uint _maxBet, uint16 _maxPrize, uint _totalnum, address _slotaddr)  
 
     arguments :  
 
-    >_provider : address of provider  
+    >_banker : address of banker  
     _decider, _minBet, _maxBet, _maxPrize : given parameters  
     _totalnum : number of user's slotmachine after creation  
     _slotaddr : address of created slotmachine
 
-   - slotMachineRemoved(address _provider, address _slotaddr, uint _totalnum)  
+   - slotMachineRemoved(address _banker, address _slotaddr, uint _totalnum)  
 
       arguments :
-      >_provider : address of provider  
+      >_banker : address of banker  
       _slotaddr : address of removed slotmachine  
       _totalnum : number of user's slotmachine after removal  
 ---
@@ -81,34 +101,34 @@ SlotMachine
 ## SlotMachineStorage
 
 ### variable
-  - address[] provideraddress
+  - address[] bankeraddress
 
-    array of provider addresses
+    array of banker addresses
 
   - mapping (address => address[]) slotMachines
 
-    mapping (provider => array of slotmachines)
+    mapping (banker => array of slotmachines)
 
-  - uint totalNumofSlotMachine;
+  - uint totalNumOfSlotMachine;
 
-    total number of slotmachines regardless of provider
+    total number of slotmachines regardless of banker
 
 ### methods
-  - isValidProvider (address _provider) constant returns (bool)
+  - isValidBanker (address _banker) constant returns (bool)
 
-    return if _provider has at least 1 slotmachine
+    return if _banker has at least 1 slotmachine
 
-  - getNumofProvider () constant returns (uint)
+  - getNumOfBanker () constant returns (uint)
 
-    return number of providers
+    return number of bankers
 
-  - getNumofSlotMachine (address _provider) constant returns (uint)
+  - getNumOfSlotMachine (address _banker) constant returns (uint)
 
-    return number of slomachines provided by _provider
+    return number of slomachines provided by _banker
 
-  - getSlotMachine (address _provider, uint _idx) constant  returns (address)
+  - getSlotMachine (address _banker, uint _idx) constant  returns (address)
 
-    return slotmachine address of _provider, index with _idx
+    return slotmachine address of _banker, index with _idx
 
 ---
 
@@ -143,9 +163,9 @@ SlotMachine
 
   - uint mMaxPrize
 
-  - uint providerBalance
+  - uint bankerBalance
 
-    provider's balance in slotmachine (wei)
+    banker's balance in slotmachine (wei)
 
   - uint playerBalance
 
@@ -156,17 +176,17 @@ SlotMachine
 
     true if initial player seed is set by *occupy*
 
-  - bool public initialProviderSeedReady
+  - bool public initialBankerSeedReady
 
-    true if initial provider seed is set by *setProviderSeed*
+    true if initial banker seed is set by *setBankerSeed*
 
   - bytes32[3] previousPlayerSeed
 
     stores playerseed of the previous game
 
-  - bytes32[3] previousProviderSeed
+  - bytes32[3] previousBankerSeed
 
-    stores providerseed of the previous game
+    stores bankerseed of the previous game
 
 
   - Game[3] mGame;
@@ -177,9 +197,9 @@ SlotMachine
     struct Game {
         uint bet;
         bool betReady;
-        bool providerSeedReady;
+        bool bankerSeedReady;
         bool playerSeedReady;
-        uint numofLines;
+        uint numOfLines;
         uint reward;
     }
     ```
@@ -200,7 +220,7 @@ SlotMachine
 
   - getInfo() constant returns (uint16, uint, uint, uint16, uint)  
 
-    return (mDecider, mMinBet, mMaxBet, mMaxPrize, providerBalance);
+    return (mDecider, mMinBet, mMaxBet, mMaxPrize, bankerBalance);
 
 
   - occupy(bytes32[3] _playerSeed)
@@ -211,23 +231,23 @@ SlotMachine
     set initial player seed with _playerSeed  
     event : gameOccupied
 
-  - initProviderSeed(bytes32[3] _providerSeed)  
+  - initBankerSeed(bytes32[3] _bankerSeed)  
 
-    set initial provider seed  
-    event : providerSeedInitialized
+    set initial banker seed  
+    event : bankerSeedInitialized
 
-  - initGameforPlayer(uint _bet, uint _lines, uint _idx)
+  - initGameForPlayer(uint _bet, uint _lines, uint _idx)
 
     start slot game with parameters  
     event : gameInitialized
 
     if game is set properly, trigger event : gameConfirmed
 
-  - setProviderSeed(bytes32 _providerSeed, uint _idx)
+  - setBankerSeed(bytes32 _bankerSeed, uint _idx)
 
-    onlyProvider  
-    set current game seed for provider  
-    event : providerSeedSet
+    onlyBanker  
+    set current game seed for banker  
+    event : bankerSeedSet
 
     if game is set properly, trigger event : gameConfirmed
 
@@ -256,8 +276,8 @@ SlotMachine
     - playerBalance : balance of initial balance
 
 
-  - providerLeft(address provider)
-    - provider : address of provider
+  - bankerLeft(address banker)
+    - banker : address of banker
 
 
   - gameOccupied(address player, bytes32[3] playerSeed)
@@ -265,8 +285,8 @@ SlotMachine
     - playerSeed : initial playerSeed
 
 
-  - providerSeedInitialized(bytes32[3] providerSeed)
-    - providerSeed : initial seed for provider
+  - bankerSeedInitialized(bytes32[3] bankerSeed)
+    - bankerSeed : initial seed for banker
 
 
   - gameInitialized(address player, uint bet, uint lines, uint idx)
@@ -276,13 +296,13 @@ SlotMachine
     - idx : index of sha3chain
 
 
-  - providerSeedSet(bytes32 providerSeed, uint idx)
-    - providerSeed : current game seed for provider
+  - bankerSeedSet(bytes32 bankerSeed, uint idx)
+    - bankerSeed : current game seed for banker
     - idx : index of sha3chain
 
 
   - playerSeedSet(bytes32 playerSeed, uint idx)
-    - playerSeed : current game seed for provider
+    - playerSeed : current game seed for banker
     - idx : index of sha3chain
 
 
@@ -298,35 +318,35 @@ SlotMachine
 //get slotmachine instance
 var slot = SlotMachine(slotaddr)
 
-//send provider's ether to slotmachine
-web3.eth.sendTransaction({from:provider, to:slotaddr, value : web3.toWei(1,"ether")})
+//send banker's ether to slotmachine
+web3.eth.sendTransaction({from:banker, to:slotaddr, value : web3.toWei(1,"ether")})
 
-//shows provider's ether
-slot.providerBalance()
+//shows banker's ether
+slot.bankerBalance()
 
 //player occupies the slotmachine, send ether
 var playerseeds = new Array(seed1,seed2,seed3)
 slot.occupy(playerseeds,{from:player,value:web3.toWei(2,"ether")})
 
-//set initial provider seed
-var providerseeds = new Array(seed4,seed5,seed6)
-slot.initProviderSeed(providerseeds)
+//set initial banker seed
+var bankerseeds = new Array(seed4,seed5,seed6)
+slot.initBankerSeed(bankerseeds)
 
 //player press button 'play' with chain_0;
-slot.initGameforPlayer(500,20,0,{from:user2})
+slot.initGameForPlayer(500,20,0,{from:user2})
 
-//provider sets seed for current game
-slot.setProviderSeed(seed,0,{from:provider})
+//banker sets seed for current game
+slot.setBankerSeed(seed,0,{from:banker})
 
 //player sets seed for current game, caculate reward
 slot.setPlayerSeed(seed,0,{from:player})
 
 //player press button 'play' with chain_1, order of transaction does not matter;
-slot.initGameforPlayer(500,20,1,{from:user2})
+slot.initGameForPlayer(500,20,1,{from:user2})
 
 slot.setPlayerSeed(seed,1,{from:player})
 
-slot.setProviderSeed(seed,1,{from:provider})
+slot.setBankerSeed(seed,1,{from:banker})
 
 
 

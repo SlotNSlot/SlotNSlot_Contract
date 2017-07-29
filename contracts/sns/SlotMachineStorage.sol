@@ -7,75 +7,75 @@ import './PaytableStorage.sol';
 
 contract SlotMachineStorage is Ownable {
     address public payStorage;
-    address[] public provideraddress;
+    address[] public bankeraddress;
     mapping (address => address[]) public slotMachines;
 
 
-    uint public totalNumofSlotMachine;
+    uint public totalNumOfSlotMachine;
 
     function SlotMachineStorage (){
-        totalNumofSlotMachine = 0;
+        totalNumOfSlotMachine = 0;
     }
 
     function setPaytableStorage(address _payStorage) {
         payStorage = _payStorage;
     }
 
-    function addProvider(address _provider, uint _slotnum) private {
-        if (slotMachines[_provider].length == 0){
-          provideraddress.push(_provider);
+    function addBanker(address _banker, uint _slotnum) private {
+        if (slotMachines[_banker].length == 0){
+          bankeraddress.push(_banker);
         }
     }
 
-    function getNumofProvider() constant returns (uint) {
-        return provideraddress.length;
+    function getNumOfBanker() constant returns (uint) {
+        return bankeraddress.length;
     }
 
-    function createSlotMachine (address _provider,  uint16 _decider, uint _minBet, uint _maxBet, uint16 _maxPrize)
+    function createSlotMachine (address _banker,  uint16 _decider, uint _minBet, uint _maxBet, uint16 _maxPrize)
         /*onlyOwner*/
         returns (address)
     {
         uint[2] memory payTable = PaytableStorage(payStorage).getPayline(_maxPrize,_decider);
-        uint8 numOfPayLine = PaytableStorage(payStorage).getNumofPayline(_maxPrize,_decider);
+        uint8 numOfPayLine = PaytableStorage(payStorage).getNumOfPayline(_maxPrize,_decider);
 
-        address newslot = address(new SlotMachine(_provider, _decider, _minBet, _maxBet, _maxPrize, payTable, numOfPayLine));
-        addProvider(_provider, 1);
-        slotMachines[_provider].push(newslot);
-        totalNumofSlotMachine++;
+        address newslot = address(new SlotMachine(_banker, _decider, _minBet, _maxBet, _maxPrize, payTable, numOfPayLine));
+        addBanker(_banker, 1);
+        slotMachines[_banker].push(newslot);
+        totalNumOfSlotMachine++;
         return newslot;
     }
 
-    function removeSlotMachine(address _provider, address _slotaddr)
+    function removeSlotMachine(address _banker, address _slotaddr)
         /*onlyOwner*/
     {
         SlotMachine(_slotaddr).shutDown();
-        slotMachines[_provider].length--;
-        totalNumofSlotMachine--;
+        slotMachines[_banker].length--;
+        totalNumOfSlotMachine--;
     }
 
-    function deleteSlotMachineinArray(address _provider, uint _idx)
+    function deleteSlotMachineinArray(address _banker, uint _idx)
 
     {
-        delete slotMachines[_provider][_idx];
+        delete slotMachines[_banker][_idx];
     }
 
-    function setSlotMachine(address _provider, uint _idx, address _newslotMachine)
+    function setSlotMachine(address _banker, uint _idx, address _newslotMachine)
         onlyOwner
     {
-        slotMachines[_provider][_idx] = _newslotMachine;
+        slotMachines[_banker][_idx] = _newslotMachine;
     }
 
-    function getNumofSlotMachine(address _provider)
+    function getNumOfSlotMachine(address _banker)
         constant returns (uint)
     {
-        return slotMachines[_provider].length;
+        return slotMachines[_banker].length;
     }
 
-    function getSlotMachine(address _provider, uint _idx)
+    function getSlotMachine(address _banker, uint _idx)
         constant returns(address)
     {
-        if (_idx < slotMachines[_provider].length) {
-          return slotMachines[_provider][_idx];
+        if (_idx < slotMachines[_banker].length) {
+          return slotMachines[_banker][_idx];
         }
         else {
           return 0x0;
