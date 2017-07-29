@@ -16,10 +16,6 @@ contract SlotMachine is Ownable {
     uint public providerBalance;
     uint public playerBalance;
 
-    /*bool[3] public betReady;
-    bool[3] public providerSeedReady;
-    bool[3] public playerSeedReady;*/
-
     bytes32[3] public previousPlayerSeed;
     bytes32[3] public previousProviderSeed;
     bool public initialPlayerSeedReady;
@@ -30,9 +26,6 @@ contract SlotMachine is Ownable {
 
     struct Game {
         uint bet;
-        /*bytes32 providerSeed;
-        bytes32 playerSeed;*/
-        /*uint randomNumber;*/
         bool betReady;
         bool providerSeedReady;
         bool playerSeedReady;
@@ -113,10 +106,6 @@ contract SlotMachine is Ownable {
         numofPayLine = _numofPayLine;
         initialProviderSeedReady = false;
         initialPlayerSeedReady = false;
-
-        /*payTable = PaytableStorage(payStorage).getPayline(mMaxPrize,mDecider);
-        numofPayLine = PaytableStorage(payStorage).getNumofPayline(mMaxPrize,mDecider);*/
-
     }
 
     function occupy(bytes32[3] _playerSeed)
@@ -140,9 +129,7 @@ contract SlotMachine is Ownable {
 
     function initProviderSeed(bytes32[3] _providerSeed)
         onlyOwner
-        /*onlyAvailable*/
     {
-        /*require(initialPlayerSeedReady);*/
         previousProviderSeed[0] = _providerSeed[0];
         previousProviderSeed[1] = _providerSeed[1];
         previousProviderSeed[2] = _providerSeed[2];
@@ -154,7 +141,6 @@ contract SlotMachine is Ownable {
     function leave()
         onlyPlayer
     {
-
         msg.sender.transfer(playerBalance);
         playerLeft(mPlayer, playerBalance);
         playerBalance = 0;
@@ -164,7 +150,6 @@ contract SlotMachine is Ownable {
         mIsGamePlaying = false;
         initialProviderSeedReady = false;
         initialPlayerSeedReady = false;
-
     }
 
     function shutDown()
@@ -176,7 +161,6 @@ contract SlotMachine is Ownable {
     }
 
     function initGameforPlayer(uint _bet, uint _lines, uint _idx)
-        /*onlyAvailable*/
         onlyPlayer
         notBankrupt
     {
@@ -205,14 +189,12 @@ contract SlotMachine is Ownable {
 
     function setProviderSeed(bytes32 _providerSeed, uint _idx)
         onlyOwner
-        /*onlyAvailable*/
     {
-        /*require(previousProviderSeed[_idx] == _providerSeed);*/
         require (previousProviderSeed[_idx] == sha3(_providerSeed));
 
         previousProviderSeed[_idx] = _providerSeed;
-        /*mGame[_idx].providerSeed = _providerSeed;*/
         mGame[_idx].providerSeedReady = true;
+
         providerSeedSet(_providerSeed, _idx);
 
         if (mGame[_idx].betReady && mGame[_idx].providerSeedReady && mGame[_idx].playerSeedReady){
@@ -224,14 +206,12 @@ contract SlotMachine is Ownable {
 
     function setPlayerSeed(bytes32 _playerSeed, uint _idx)
         onlyPlayer
-        /*onlyAvailable*/
     {
-        /*require(previousPlayerSeed[_idx] == _playerSeed);*/
         require (previousPlayerSeed[_idx] == sha3(_playerSeed));
-        previousPlayerSeed[_idx] = _playerSeed;
 
-        /*mGame[_idx].playerSeed = _playerSeed;*/
+        previousPlayerSeed[_idx] = _playerSeed;
         mGame[_idx].playerSeedReady = true;
+
         playerSeedSet(_playerSeed, _idx);
 
         if (mGame[_idx].betReady && mGame[_idx].providerSeedReady && mGame[_idx].playerSeedReady){
@@ -255,13 +235,9 @@ contract SlotMachine is Ownable {
 
     function confirmGame(uint _idx)
     {
-        /*if(previousProviderSeed[_idx] != sha3(mGame[_idx].providerSeed) || previousPlayerSeed[_idx] != sha3(mGame[_idx].playerSeed)) {
-            return;
-        }*/
         uint reward = 0;
         uint factor = 0;
         uint divider = 10000000000;
-        /*bytes32 rnseed = sha3(mGame[_idx].providerSeed ^ mGame[_idx].playerSeed);*/
         bytes32 rnseed = sha3(previousProviderSeed[_idx] ^ previousPlayerSeed[_idx]);
         uint randomNumber = uint(rnseed) % divider;
 
@@ -279,14 +255,11 @@ contract SlotMachine is Ownable {
         }
         reward = reward * mGame[_idx].bet;
 
-        /*mGame[_idx].randomNumber = randomNumber;*/
         mGame[_idx].reward = reward;
 
         providerBalance -= reward;
         playerBalance += reward;
 
-        /*previousProviderSeed[_idx] = mGame[_idx].providerSeed;
-        previousPlayerSeed[_idx] = mGame[_idx].playerSeed;*/
         gameConfirmed(reward, _idx);
 
         mGame[_idx].betReady = false;

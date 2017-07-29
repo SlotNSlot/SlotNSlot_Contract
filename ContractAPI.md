@@ -8,6 +8,9 @@
 
   - game struct changed
 
+SlotMachine
+  - Game[3] mGames => Game[3] mGame
+  - mAvailable : true if slot is not occupied by player, false if slot is occupied
 
 ---
 0.1
@@ -113,8 +116,9 @@ SlotMachine
 ### variable
   - bool mAvailable
 
-    true if player can play game  
-    false if provider shutdown the slotmachine
+    true if slot is not occupied by player  
+    false if slot is occupied
+
 
   - bool public mBankrupt
 
@@ -171,15 +175,14 @@ SlotMachine
     stores providerseed of the previous game
 
 
-  - Game[3] mGames;
+  - Game[3] mGame;
 
     stores game information for each round  
 
     ```solidity
     struct Game {
         uint bet;
-        bytes32 providerSeed;
-        bytes32 playerSeed;
+        bool betReady;
         bool providerSeedReady;
         bool playerSeedReady;
         uint numofLines;
