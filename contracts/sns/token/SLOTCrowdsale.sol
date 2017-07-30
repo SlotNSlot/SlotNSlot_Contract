@@ -11,10 +11,10 @@ import 'zeppelin-solidity/contracts/math/SafeMath.sol';
 contract SLOTCrowdsale {
 
     /**
-     *  The funding goal is 50000 eth originally, 
+     *  The funding hard cap is 50000 eth originally, 
      *  but we set this into 100000 eth to prevent unexpected problem.
      */
-    uint public constant FUNDING_GOAL = 100000000000000000000000;
+    uint public constant FUNDING_HARD_CAP = 100000000000000000000000;
 
     /**
      *  If a investor funds until (mStartTime + EARLY_BIRD_DURATION),
