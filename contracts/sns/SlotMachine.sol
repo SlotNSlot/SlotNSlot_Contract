@@ -1,51 +1,39 @@
 pragma solidity ^0.4.0;
 
 import 'zeppelin-solidity/contracts/ownership/Ownable.sol';
-import './PaytableStorage.sol';
-
 
 contract SlotMachine is Ownable {
     bool public mAvailable;
     bool public mBankrupt;
     address public mPlayer;
-
     uint16 public mDecider;
     uint public mMinBet;
     uint public mMaxBet;
     uint16 public mMaxPrize;
 
-    address public payStorage;
-
     bool public mIsGamePlaying;
 
-    bool betReady;
-    bool playerSeedReady;
-    bool providerSeedReady;
-
-    uint public providerBalance;
+    uint public bankerBalance;
     uint public playerBalance;
 
-    bytes32 public previousPlayerSeed;
-    bytes32 public previousProviderSeed;
-
+    bytes32[3] public previousPlayerSeed;
+    bytes32[3] public previousBankerSeed;
     bool public initialPlayerSeedReady;
-    bool public initialProviderSeedReady;
+    bool public initialBankerSeedReady;
 
     uint[2] public payTable;
     uint8 public numOfPayLine;
 
     struct Game {
         uint bet;
-        bytes32 providerSeed;
-        bytes32 playerSeed;
-        uint randomNumber;
-        bool providerSeedReady;
+        bool betReady;
+        bool bankerSeedReady;
         bool playerSeedReady;
-        uint numofLines;
+        uint numOfLines;
         uint reward;
     }
 
-    Game public mGame;
+    Game[3] public mGame;
     /*
         MODIFIERS
     */
@@ -77,30 +65,31 @@ contract SlotMachine is Ownable {
         EVENTS
     */
     event playerLeft(address player, uint playerBalance);
-    event providerLeft(address provider);
+    event bankerLeft(address banker);
 
-    event gameOccupied(address player, bytes32 playerSeed);
-    event providerSeedInitialized(bytes32 providerSeed);
+    event gameOccupied(address player, bytes32[3] playerSeed);
+    event bankerSeedInitialized(bytes32[3] bankerSeed);
 
-    event gameInitialized(address player, uint bet, uint lines);
-    event providerSeedSet(bytes32 providerSeed);
-    event playerSeedSet(bytes32 playerSeed);
+    event gameInitialized(address player, uint bet, uint lines, uint idx);
+    event bankerSeedSet(bytes32 bankerSeed, uint idx);
+    event playerSeedSet(bytes32 playerSeed, uint idx);
 
-    event gameConfirmed(uint reward);
+    event gameConfirmed(uint reward, uint idx);
 
     function () payable {
       if (msg.sender == owner || tx.origin == owner) {
-        providerBalance += msg.value;
+        bankerBalance += msg.value;
       } else if(msg.sender == mPlayer) {
         playerBalance += msg.value;
       }
 
     }
 
-    function SlotMachine(address _provider, uint16 _decider, uint _minBet, uint _maxBet, uint16 _maxPrize, address _payStorage)
+    function SlotMachine(address _banker, uint16 _decider, uint _minBet, uint _maxBet, uint16 _maxPrize,
+      uint[2] _payTable, uint8 _numOfPayLine)
         payable
     {
-        transferOwnership(_provider);
+        transferOwnership(_banker);
 
         mDecider = _decider;
         mPlayer = 0x0;
@@ -111,36 +100,15 @@ contract SlotMachine is Ownable {
         mMaxPrize = _maxPrize;
         mIsGamePlaying = false;
 
-        mGame.bet = 0;
-        mGame.providerSeed = 0;
-        mGame.playerSeed = 0;
-        mGame.randomNumber = 0;
-        mGame.playerSeedReady = false;
-        mGame.providerSeedReady = false;
-        mGame.numofLines = 1;
-        mGame.reward = 1;
+        bankerBalance = msg.value;
 
-        payStorage = _payStorage;
-
-        providerBalance = msg.value;
-        playerBalance = 0;
-
-        betReady = false;
-        providerSeedReady = false;
-        playerSeedReady = false;
-
-        previousProviderSeed = 0x0;
-        previousPlayerSeed = 0x0;
-
-        initialProviderSeedReady = false;
+        payTable = _payTable;
+        numOfPayLine = _numOfPayLine;
+        initialBankerSeedReady = false;
         initialPlayerSeedReady = false;
-
-        payTable = PaytableStorage(payStorage).getPayline(mMaxPrize,mDecider);
-        numOfPayLine = PaytableStorage(payStorage).getNumofPayline(mMaxPrize,mDecider);
-
     }
 
-    function occupy(bytes32 _playerSeed)
+    function occupy(bytes32[3] _playerSeed)
         payable
         onlyAvailable
         notOccupied
@@ -151,28 +119,28 @@ contract SlotMachine is Ownable {
         mPlayer = msg.sender;
         playerBalance += msg.value;
         mAvailable = false;
-
-        previousPlayerSeed = _playerSeed;
+        previousPlayerSeed[0] = _playerSeed[0];
+        previousPlayerSeed[1] = _playerSeed[1];
+        previousPlayerSeed[2] = _playerSeed[2];
 
         initialPlayerSeedReady = true;
         gameOccupied(mPlayer, _playerSeed);
     }
 
-    function initProviderSeed(bytes32 _providerSeed)
+    function initBankerSeed(bytes32[3] _bankerSeed)
         onlyOwner
-        onlyAvailable
     {
-        require(initialPlayerSeedReady);
+        previousBankerSeed[0] = _bankerSeed[0];
+        previousBankerSeed[1] = _bankerSeed[1];
+        previousBankerSeed[2] = _bankerSeed[2];
 
-        previousProviderSeed = _providerSeed;
-        initialProviderSeedReady = true;
-        providerSeedInitialized(_providerSeed);
+        initialBankerSeedReady = true;
+        bankerSeedInitialized(_bankerSeed);
     }
 
     function leave()
         onlyPlayer
     {
-
         msg.sender.transfer(playerBalance);
         playerLeft(mPlayer, playerBalance);
         playerBalance = 0;
@@ -180,11 +148,8 @@ contract SlotMachine is Ownable {
         mBankrupt = false;
         mPlayer = 0x0;
         mIsGamePlaying = false;
-        previousProviderSeed = 0x0;
-        previousPlayerSeed = 0x0;
-        initialProviderSeedReady = false;
+        initialBankerSeedReady = false;
         initialPlayerSeedReady = false;
-
     }
 
     function shutDown()
@@ -195,62 +160,62 @@ contract SlotMachine is Ownable {
         selfdestruct(owner);
     }
 
-    function initGameforPlayer(uint _bet, uint _lines)
-        onlyAvailable
+    function initGameForPlayer(uint _bet, uint _lines, uint _idx)
         onlyPlayer
         notBankrupt
     {
         require(_bet >= mMinBet && _bet <= mMaxBet);
         require(_bet * _lines <= playerBalance);
 
-        if(_bet * _lines > providerBalance) {
+        if(_bet * _lines > bankerBalance) {
             mBankrupt = true;
             throw;
         }
 
-        mGame.numofLines = _lines;
-        mGame.bet = _bet;
+        mGame[_idx].numOfLines = _lines;
+        mGame[_idx].bet = _bet;
 
         playerBalance -= _bet * _lines;
-        providerBalance += _bet * _lines;
+        bankerBalance += _bet * _lines;
 
-        betReady = true;
-        gameInitialized(mPlayer, _bet, _lines);
+        mGame[_idx].betReady = true;
+        gameInitialized(mPlayer, _bet, _lines, _idx);
 
-        if (betReady && providerSeedReady && playerSeedReady){
-          confirmGame();
+        if (mGame[_idx].betReady && mGame[_idx].bankerSeedReady && mGame[_idx].playerSeedReady){
+          confirmGame(_idx);
         }
 
     }
 
-    function setProviderSeed(bytes32 _providerSeed)
+    function setBankerSeed(bytes32 _bankerSeed, uint _idx)
         onlyOwner
-        onlyAvailable
     {
+        require (previousBankerSeed[_idx] == sha3(_bankerSeed));
 
-        mGame.providerSeed = _providerSeed;
-        mGame.providerSeedReady = true;
-        providerSeedReady = true;
-        providerSeedSet(_providerSeed);
+        previousBankerSeed[_idx] = _bankerSeed;
+        mGame[_idx].bankerSeedReady = true;
 
-        if (betReady && providerSeedReady && playerSeedReady){
-          confirmGame();
+        bankerSeedSet(_bankerSeed, _idx);
+
+        if (mGame[_idx].betReady && mGame[_idx].bankerSeedReady && mGame[_idx].playerSeedReady){
+          confirmGame(_idx);
         }
 
     }
 
 
-    function setPlayerSeed(bytes32 _playerSeed)
+    function setPlayerSeed(bytes32 _playerSeed, uint _idx)
         onlyPlayer
-        onlyAvailable
     {
-        mGame.playerSeed = _playerSeed;
-        mGame.playerSeedReady = true;
-        playerSeedReady = true;
-        playerSeedSet(_playerSeed);
+        require (previousPlayerSeed[_idx] == sha3(_playerSeed));
 
-        if (betReady && providerSeedReady && playerSeedReady){
-          confirmGame();
+        previousPlayerSeed[_idx] = _playerSeed;
+        mGame[_idx].playerSeedReady = true;
+
+        playerSeedSet(_playerSeed, _idx);
+
+        if (mGame[_idx].betReady && mGame[_idx].bankerSeedReady && mGame[_idx].playerSeedReady){
+          confirmGame(_idx);
         }
     }
 
@@ -268,18 +233,15 @@ contract SlotMachine is Ownable {
 
   	}
 
-    function confirmGame()
+    function confirmGame(uint _idx)
     {
-        if(previousProviderSeed != sha3(mGame.providerSeed) || previousPlayerSeed != sha3(mGame.playerSeed)) {
-            return;
-        }
         uint reward = 0;
         uint factor = 0;
         uint divider = 10000000000;
-        bytes32 rnseed = sha3(mGame.providerSeed ^ mGame.playerSeed);
+        bytes32 rnseed = sha3(previousBankerSeed[_idx] ^ previousPlayerSeed[_idx]);
         uint randomNumber = uint(rnseed) % divider;
 
-        for(uint j=0; j<mGame.numofLines; j++){
+        for(uint j=0; j<mGame[_idx].numOfLines; j++){
           factor = 0;
           rnseed = rnseed<<1;
           randomNumber = uint(rnseed) % divider;
@@ -291,25 +253,23 @@ contract SlotMachine is Ownable {
             factor += getPayline(i,2);
           }
         }
-        reward = reward * mGame.bet;
+        reward = reward * mGame[_idx].bet;
 
-        mGame.randomNumber = randomNumber;
-        mGame.reward = reward;
+        mGame[_idx].reward = reward;
 
-        providerBalance -= reward;
+        bankerBalance -= reward;
         playerBalance += reward;
 
-        previousProviderSeed = mGame.providerSeed;
-        previousPlayerSeed = mGame.playerSeed;
-        gameConfirmed(reward);
+        gameConfirmed(reward, _idx);
 
-        betReady = false;
-        providerSeedReady = false;
-        playerSeedReady = false;
+        mGame[_idx].betReady = false;
+        mGame[_idx].bankerSeedReady = false;
+        mGame[_idx].playerSeedReady = false;
 
     }
 
-    function getInfo() constant returns (uint, uint, uint) {
-        return (mDecider, mMinBet, mMaxBet);
+    function getInfo() constant returns (uint16, uint, uint, uint16, uint) {
+      //todo : add return values
+        return (mDecider, mMinBet, mMaxBet, mMaxPrize, bankerBalance);
     }
 }

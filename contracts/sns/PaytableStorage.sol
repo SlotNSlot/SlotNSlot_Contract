@@ -64,7 +64,7 @@ contract PaytableStorage is Ownable {
         return payTable[_prize][_prob];
     }
 
-    function getNumofPayline(uint16 _prize, uint16 _prob) constant returns (uint8) {
+    function getNumOfPayline(uint16 _prize, uint16 _prob) constant returns (uint8) {
         uint targetPayline = payTable[_prize][_prob][0];
         return uint8(targetPayline>>252);
     }
