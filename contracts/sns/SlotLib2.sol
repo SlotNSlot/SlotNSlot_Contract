@@ -29,7 +29,10 @@ library SlotLib2 {
         }
 
         SlotMachineStorage(_slotmachineStorage).removeSlotMachine(_banker, _slotaddr);
+        SlotMachineStorage(_slotmachineStorage).setSlotMachineInArray(SlotMachineStorage(_slotmachineStorage).getIdxOfSlotMachinesArray(_slotaddr),0x0);
         slotMachineRemoved(_banker, _slotaddr, totalnum-1);
+
+
     }
 
 
