@@ -10,11 +10,11 @@ contract SlotMachineStorage is Ownable {
     address[] public bankeraddress;
     mapping (address => address[]) public slotMachines;
 
-
     uint public totalNumOfSlotMachine;
 
-    function SlotMachineStorage (){
+    function SlotMachineStorage (address _payStorage){
         totalNumOfSlotMachine = 0;
+        payStorage = _payStorage;
     }
 
     function setPaytableStorage(address _payStorage) {
@@ -82,5 +82,12 @@ contract SlotMachineStorage is Ownable {
         }
     }
 
-
+    function getIdxOfSlotMachine(address _banker, address _slotaddr)
+        constant returns (uint)
+    {
+        uint totalnum = getNumOfSlotMachine(_banker);
+        for (uint i=0;i<totalnum;i++) {
+            if(slotMachines[_banker][i] == _slotaddr) return i;
+        }
+    }
 }

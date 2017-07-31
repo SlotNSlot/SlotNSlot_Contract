@@ -40,8 +40,8 @@ contract SlotMachineManager {
         return newslot;
     }
 
-    function removeSlotMachine(uint _idx) {
-        slotmachineStorage.removeSlotMachine(msg.sender, _idx);
+    function removeSlotMachine(address _slotaddr) {
+        slotmachineStorage.removeSlotMachine(msg.sender, _slotaddr);
     }
 
 

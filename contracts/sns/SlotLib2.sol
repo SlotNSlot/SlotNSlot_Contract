@@ -15,18 +15,21 @@ library SlotLib2 {
         return newslot;
     }
 
-    function removeSlotMachine (address _slotmachineStorage, address _banker, uint _idx) {
+    function removeSlotMachine (address _slotmachineStorage, address _banker, address _slotaddr) {
         uint totalnum = SlotMachineStorage(_slotmachineStorage).getNumOfSlotMachine(_banker);
-        address slottoremove = SlotMachineStorage(_slotmachineStorage).getSlotMachine(_banker, _idx);
-        require(_idx < totalnum);
-
-        for (uint i = _idx; i < totalnum-1 ; i++){
-            SlotMachineStorage(_slotmachineStorage).setSlotMachine(_banker, i, SlotMachineStorage(_slotmachineStorage).getSlotMachine(_banker, i + 1));
+        bool startRemove = false;
+        for (uint i = 0; i < totalnum ; i++){
+            if (startRemove) {
+                SlotMachineStorage(_slotmachineStorage).setSlotMachine(_banker, i, SlotMachineStorage(_slotmachineStorage).getSlotMachine(_banker, i + 1));
+            }
+            else if (SlotMachineStorage(_slotmachineStorage).getSlotMachine(_banker, i) == _slotaddr) {
+                startRemove = true;
+                SlotMachineStorage(_slotmachineStorage).setSlotMachine(_banker, i, SlotMachineStorage(_slotmachineStorage).getSlotMachine(_banker, i + 1));
+            }
         }
 
-        SlotMachineStorage(_slotmachineStorage).setSlotMachine(_banker, totalnum-1, address(0x0));
-        SlotMachineStorage(_slotmachineStorage).removeSlotMachine(_banker, slottoremove);
-        slotMachineRemoved(_banker, slottoremove, totalnum-1);
+        SlotMachineStorage(_slotmachineStorage).removeSlotMachine(_banker, _slotaddr);
+        slotMachineRemoved(_banker, _slotaddr, totalnum-1);
     }
 
 
