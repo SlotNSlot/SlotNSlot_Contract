@@ -32,11 +32,11 @@ contract SlotMachineManager {
     }
 
 
-    function createSlotMachine(uint16 _decider, uint _minBet, uint _maxBet, uint16 _maxPrize)
+    function createSlotMachine(uint16 _decider, uint _minBet, uint _maxBet, uint16 _maxPrize, bytes32 _name)
         returns (address)
     {
         address newslot;
-        newslot = slotmachineStorage.createSlotMachine(msg.sender, _decider, _minBet, _maxBet, _maxPrize);
+        newslot = slotmachineStorage.createSlotMachine(msg.sender, _decider, _minBet, _maxBet, _maxPrize, _name);
         return newslot;
     }
 

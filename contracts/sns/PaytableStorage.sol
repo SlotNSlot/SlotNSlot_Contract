@@ -31,6 +31,7 @@ contract PaytableStorage is Ownable {
     */
 
     function PaytableStorage() {
+
         payTable[1000][100][0] = 0xb006a57b219002c5f4e04b016d5b8c0c8139cfcc81919107c0a02958739a9805;
         payTable[1000][100][1] = 0x70cc3e800060e207d0005336e8fa0033a926258011de5b87d;
 

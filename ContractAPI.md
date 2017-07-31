@@ -1,5 +1,21 @@
-#SlotMachine API 0.12v
+#SlotMachine API 0.2v
 
+---
+0.2
+
+SlotMachineManager
+  - createSlotMachine(uint _decider, uint _minBet, uint _maxBet, uint _maxPrize) => createSlotMachine(uint16 _decider, uint _minBet, uint _maxBet, uint16 _maxPrize, bytes32 _name)
+
+  - removeSlotMachine(uint _idx) => removeSlotMachine(address _slotaddr)  
+
+SlotMachineStorage  
+
+  - variable slotMachinesArray added
+  - method *getLengthOfSlotMachinesArray* added
+
+SlotMachine
+
+  - variable mName added
 ---
 0.12
 
@@ -63,15 +79,15 @@ SlotMachine
 
 ###methods
 
-- createSlotMachine(uint _decider, uint _minBet, uint _maxBet, uint _maxPrize) returns (address)
+- createSlotMachine(uint _decider, uint _minBet, uint _maxBet, uint _maxPrize, bytes32 _name) returns (address)
 
   create slotmachine with following parameters  
   return address of created slotmachine  
   event : slotMachineCreated  
 
-- removeSlotMachine(uint _idx)
+- removeSlotMachine(address _slotaddr)
 
-  remove slotmachine[_idx] from slotmachine array, rest of arrays will be sorted automatically
+  remove slotmachine (address : _slotaddr) from slotMachine mapping
   refund slotmachine's deposit to banker
   event : slotMachineRemoved
 
@@ -81,21 +97,18 @@ SlotMachine
 
 
 ###events
-  - slotMachineCreated (address _banker, uint16 _decider, uint _minBet, uint _maxBet, uint16 _maxPrize, uint _totalnum, address _slotaddr)  
+  - slotMachineCreated (address _banker, uint16 _decider, uint _minBet, uint _maxBet, uint16 _maxPrize, uint _totalnum, address _slotaddr)    
+    - _banker : address of banker  
+    - _decider, _minBet, _maxBet, _maxPrize : given parameters  
+    - _totalnum : number of user's slotmachine after creation  
+    - _slotaddr : address of created slotmachine
 
-    arguments :  
-
-    >_banker : address of banker  
-    _decider, _minBet, _maxBet, _maxPrize : given parameters  
-    _totalnum : number of user's slotmachine after creation  
-    _slotaddr : address of created slotmachine
 
    - slotMachineRemoved(address _banker, address _slotaddr, uint _totalnum)  
 
-      arguments :
-      >_banker : address of banker  
-      _slotaddr : address of removed slotmachine  
-      _totalnum : number of user's slotmachine after removal  
+      - _banker : address of banker  
+      - _slotaddr : address of removed slotmachine  
+      - _totalnum : number of user's slotmachine after removal  
 ---
 
 ## SlotMachineStorage
@@ -112,6 +125,35 @@ SlotMachine
   - uint totalNumOfSlotMachine;
 
     total number of slotmachines regardless of banker
+
+  - address[] slotMachinesArray;
+
+    array of slotmachines regardless of banker
+    removeSlotMachine through SlotMachineManager sets target slotmachine with '0x0000000000000000000000000000000000000000'  
+    total length of slotMachinesArray can be achieved by *getLengthOfSlotMachinesArray()*
+
+    ```js
+    manager.createSlotMachine(150,100,100000,2000);
+
+    storage.totalNumOfSlotMachine();
+    //1
+    storage.getLengthOfSlotMachinesArray();
+    //1
+    storage.slotMachinesArray(0);
+    //'0x14bcf7a5a63310d7f72a4d6fabd4a0104e20822d'
+
+    manager.removeSlotMachine('0x14bcf7a5a63310d7f72a4d6fabd4a0104e20822d');
+
+    storage.totalNumOfSlotMachine();
+    //0
+    storage.getLengthOfSlotMachinesArray();
+    //1
+    storage.slotMachinesArray(0);
+    //'0x0000000000000000000000000000000000000000'
+
+
+    ```
+
 
 ### methods
   - isValidBanker (address _banker) constant returns (bool)
@@ -130,11 +172,22 @@ SlotMachine
 
     return slotmachine address of _banker, index with _idx
 
+  - getLengthOfSlotMachinesArray() constant returns (uint)
+
+    return length of slotMachinesArray
+
+
 ---
 
 ## SlotMachine
 
 ### variable
+
+  - bytes32 mName
+
+    name of SlotMachine
+
+
   - bool mAvailable
 
     true if slot is not occupied by player  

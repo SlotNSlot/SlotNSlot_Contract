@@ -10,6 +10,7 @@ contract SlotMachine is Ownable {
     uint public mMinBet;
     uint public mMaxBet;
     uint16 public mMaxPrize;
+    bytes32 public mName;
 
     bool public mIsGamePlaying;
 
@@ -86,11 +87,11 @@ contract SlotMachine is Ownable {
     }
 
     function SlotMachine(address _banker, uint16 _decider, uint _minBet, uint _maxBet, uint16 _maxPrize,
-      uint[2] _payTable, uint8 _numOfPayLine)
+      uint[2] _payTable, uint8 _numOfPayLine, bytes32 _mName)
         payable
     {
         transferOwnership(_banker);
-
+        mName = _mName;
         mDecider = _decider;
         mPlayer = 0x0;
         mAvailable = true;
