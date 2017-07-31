@@ -9,8 +9,6 @@ var PaytableStorage = artifacts.require("./sns/PaytableStorage.sol");
 
 module.exports = function(deployer) {
 
-  // deployer.deploy(MetaCoin);
-
     deployer.deploy(SlotLib).then(function() {
       console.log('SlotLib address : ', SlotLib.address);
       return deployer.deploy(DispatcherStorage, SlotLib.address);
@@ -45,12 +43,6 @@ module.exports = function(deployer) {
         })
       });
     });
-    // deployer.deploy(PaytableStorage);
 
-    // deployer.deploy(SlotMachine,'0xaa72f9eaf13f6d1152a2d190eec9b10aeb7bc33c',150,100,10000,1000,'0x0');
-    // deployer.deploy(SlotMachineStorage);
-    // deployer.deploy(SlotLib2).then(function() {
-    //   console.log('SlotLib2 address : ', SlotLib2.address);
-    // });
 
 };
