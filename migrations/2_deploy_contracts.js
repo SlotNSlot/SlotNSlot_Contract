@@ -1,7 +1,6 @@
 var SlotMachineStorage = artifacts.require("./sns/SlotMachineStorage.sol");
 var SlotMachineManager = artifacts.require("./sns/SlotMachineManager.sol");
 var SlotLib = artifacts.require("./sns/SlotLib.sol");
-var SlotLib2 = artifacts.require("./sns/SlotLib2.sol");
 var Dispatcher = artifacts.require("./Dispatcher.sol");
 var DispatcherStorage = artifacts.require("./DispatcherStorage.sol");
 var SlotMachine = artifacts.require("./sns/SlotMachine.sol");
@@ -42,8 +41,4 @@ module.exports = function(deployer) {
       });
     });
 
-    // deployer.deploy(SlotMachine,'0x98808f0a61c3d5618732d494e0fbcd21ee8ff04a',
-    //   150,200,200000,2000,(new Array
-    //     ('0xc0042351a19001e47b684b011bbe080c813001678192085bd6202a2d85058805',
-    //       '0x1f73f4000021b23e8000241a07d00026ae08fa001c430625800a5c4c87d')),11);
 };
