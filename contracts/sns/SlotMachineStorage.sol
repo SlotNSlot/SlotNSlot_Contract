@@ -41,8 +41,6 @@ contract SlotMachineStorage is Ownable {
 
         address newslot = address(new SlotMachine(_banker, _decider, _minBet, _maxBet, _maxPrize, payTable, numOfPayLine));
         addBanker(_banker, 1);
-        /*slotMachines[_banker].push(newslot);
-        slotMachinesArray.push(newslot);*/
 
         addSlotMachine(_banker, newslot);
         addSlotMachineInArray(newslot);
@@ -99,7 +97,7 @@ contract SlotMachineStorage is Ownable {
     function addSlotMachineInArray(address _slotaddr) {
         slotMachinesArray.push(_slotaddr);
     }
-    
+
     function setSlotMachineInArray(uint _idx, address _slotaddr) {
         slotMachinesArray[_idx] = _slotaddr;
     }
