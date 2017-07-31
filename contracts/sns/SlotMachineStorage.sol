@@ -13,7 +13,7 @@ contract SlotMachineStorage is Ownable {
 
     uint public totalNumOfSlotMachine;
 
-    function SlotMachineStorage (address _payStorage){
+    function SlotMachineStorage (address _payStorage) {
         totalNumOfSlotMachine = 0;
         payStorage = _payStorage;
     }
@@ -32,14 +32,14 @@ contract SlotMachineStorage is Ownable {
         return bankeraddress.length;
     }
 
-    function createSlotMachine (address _banker,  uint16 _decider, uint _minBet, uint _maxBet, uint16 _maxPrize)
-        onlyOwner
+    function createSlotMachine (address _banker,  uint16 _decider, uint _minBet, uint _maxBet, uint16 _maxPrize, bytes32 _name)
+        /*onlyOwner*/
         returns (address)
     {
         uint[2] memory payTable = PaytableStorage(payStorage).getPayline(_maxPrize,_decider);
         uint8 numOfPayLine = PaytableStorage(payStorage).getNumOfPayline(_maxPrize,_decider);
 
-        address newslot = address(new SlotMachine(_banker, _decider, _minBet, _maxBet, _maxPrize, payTable, numOfPayLine));
+        address newslot = address(new SlotMachine(_banker, _decider, _minBet, _maxBet, _maxPrize, payTable, numOfPayLine, _name));
         addBanker(_banker, 1);
 
         addSlotMachine(_banker, newslot);
@@ -49,7 +49,7 @@ contract SlotMachineStorage is Ownable {
         return newslot;
     }
 
-    function addSlotMachine(address _banker, address _slotaddr) {
+    function addSlotMachine(address _banker, address _slotaddr) private {
         slotMachines[_banker].push(_slotaddr);
     }
 
@@ -94,11 +94,17 @@ contract SlotMachineStorage is Ownable {
         }
     }
 
-    function addSlotMachineInArray(address _slotaddr) {
+    function getLengthOfSlotMachinesArray() constant returns (uint) {
+        return slotMachinesArray.length;
+    }
+
+    function addSlotMachineInArray(address _slotaddr) private {
         slotMachinesArray.push(_slotaddr);
     }
 
-    function setSlotMachineInArray(uint _idx, address _slotaddr) {
+    function setSlotMachineInArray(uint _idx, address _slotaddr)
+        onlyOwner
+    {
         slotMachinesArray[_idx] = _slotaddr;
     }
 

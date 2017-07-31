@@ -7,10 +7,9 @@ library SlotLib {
     event slotMachineCreated(address _banker, uint16 _decider, uint _minBet, uint _maxBet, uint16 _maxPrize, uint _totalnum, address _slotaddr);
     event slotMachineRemoved(address _banker, address _slotaddr, uint _totalnum);
 
-
     //create new slotmachine
-    function createSlotMachine (address _slotmachineStorage, address _banker,  uint16 _decider, uint _minBet, uint _maxBet, uint16 _maxPrize) returns (address) {
-        address newslot = address(SlotMachineStorage(_slotmachineStorage).createSlotMachine(_banker, _decider, _minBet, _maxBet, _maxPrize));
+    function createSlotMachine (address _slotmachineStorage, address _banker,  uint16 _decider, uint _minBet, uint _maxBet, uint16 _maxPrize, bytes32 _name) returns (address) {
+        address newslot = address(SlotMachineStorage(_slotmachineStorage).createSlotMachine(_banker, _decider, _minBet, _maxBet, _maxPrize, _name));
         slotMachineCreated(_banker, _decider, _minBet, _maxBet, _maxPrize, SlotMachineStorage(_slotmachineStorage).getNumOfSlotMachine(_banker),newslot);
         return newslot;
     }
