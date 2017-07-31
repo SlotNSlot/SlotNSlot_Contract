@@ -1,14 +1,13 @@
 var SlotMachineStorage = artifacts.require("./sns/SlotMachineStorage.sol");
 var SlotMachineManager = artifacts.require("./sns/SlotMachineManager.sol");
 var SlotLib = artifacts.require("./sns/SlotLib.sol");
-var SlotLib2 = artifacts.require("./sns/SlotLib2.sol");
 var Dispatcher = artifacts.require("./Dispatcher.sol");
 var DispatcherStorage = artifacts.require("./DispatcherStorage.sol");
 var SlotMachine = artifacts.require("./sns/SlotMachine.sol");
 var PaytableStorage = artifacts.require("./sns/PaytableStorage.sol");
 
 module.exports = function(deployer) {
-
+    var slotstorage, paystorage;
     deployer.deploy(SlotLib).then(function() {
       console.log('SlotLib address : ', SlotLib.address);
       return deployer.deploy(DispatcherStorage, SlotLib.address);
@@ -21,17 +20,15 @@ module.exports = function(deployer) {
       Dispatcher.unlinked_binary = Dispatcher.unlinked_binary
         .replace('1111222233334444555566667777888899990000',
         DispatcherStorage.address.slice(2));
+      return deployer.deploy(PaytableStorage);
     })
     .then(() => {
       console.log('unlinked_binary : ', Dispatcher.unlinked_binary);
-      deployer.deploy(PaytableStorage).then(function() {
-        console.log('PaytableStorage created', PaytableStorage.address);
-      });
+      console.log('PaytableStorage address : ',PaytableStorage.address);
+      return deployer.deploy(SlotMachineStorage, PaytableStorage.address);
     })
     .then(() => {
-      deployer.deploy(SlotMachineStorage).then(function() {
         console.log('SlotMachineStorage address : ', SlotMachineStorage.address);
-      });
     })
     .then(function () {
       return deployer.deploy(Dispatcher).then(function (){
@@ -43,6 +40,5 @@ module.exports = function(deployer) {
         })
       });
     });
-
 
 };
