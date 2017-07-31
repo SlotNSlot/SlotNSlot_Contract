@@ -33,7 +33,7 @@ contract SlotMachineStorage is Ownable {
     }
 
     function createSlotMachine (address _banker,  uint16 _decider, uint _minBet, uint _maxBet, uint16 _maxPrize, bytes32 _name)
-        /*onlyOwner*/
+        onlyOwner
         returns (address)
     {
         uint[2] memory payTable = PaytableStorage(payStorage).getPayline(_maxPrize,_decider);
