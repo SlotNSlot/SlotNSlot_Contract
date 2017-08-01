@@ -226,33 +226,28 @@ contract SlotMachine is Ownable {
         uint8 ptr = (_idx <= 6) ? 0 : 1;
         targetPayline = payTable[ptr];
 
-        uint8 leftwalker = (_idx <= 6) ? (_idx * 42) : ((_idx - 6) * 42);
-        uint8 rightwalker = (-_indicator + 2) * 31;
-        uint8 additionalwalker = ((_idx - 6 * ptr) - 1) * 42 + (_indicator - 1) * 11;
+        uint8 leftwalker = ((_idx <= 6) ? (_idx * 42) : ((_idx - 6) * 42)) + (-_indicator + 2) * 31;
+        uint8 rightwalker = ((_idx - 6 * ptr) - 1) * 42 + (_indicator - 1) * 11;
 
-        return (targetPayline << (256 - leftwalker + rightwalker)) >> (256 - leftwalker + rightwalker + additionalwalker);
+        return (targetPayline << (256 - leftwalker)) >> (256 - leftwalker + rightwalker);
 
   	}
 
     function confirmGame(uint _idx)
     {
         uint reward = 0;
-        uint factor = 0;
         uint divider = 10000000000;
         bytes32 rnseed = sha3(previousBankerSeed[_idx] ^ previousPlayerSeed[_idx]);
         uint randomNumber = uint(rnseed) % divider;
 
         for(uint j=0; j<mGame[_idx].numOfLines; j++){
-          factor = 0;
-          rnseed = rnseed<<1;
-          randomNumber = uint(rnseed) % divider;
-          for(uint8 i=1; i<numOfPayLine; i++){
-            if(factor <= randomNumber && randomNumber < factor + getPayline(i,2)){
-              reward += getPayline(i,1);
-              break;
+            randomNumber = uint(rnseed<<j) % divider;
+            for(uint8 i=1; i<numOfPayLine; i++){
+                if(randomNumber < getPayline(i,2)){
+                    reward += getPayline(i,1);
+                    break;
+                }
             }
-            factor += getPayline(i,2);
-          }
         }
         reward = reward * mGame[_idx].bet;
 
