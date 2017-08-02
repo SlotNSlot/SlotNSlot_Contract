@@ -75,6 +75,4 @@ contract PaytableStorage is Ownable {
         payTable[_maxPrize][_targetProb][1] = _b;
     }
 
-  
-
 }

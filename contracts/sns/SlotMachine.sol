@@ -1,4 +1,4 @@
-pragma solidity ^0.4.0;
+pragma solidity ^0.4.1;
 
 import 'zeppelin-solidity/contracts/ownership/Ownable.sol';
 
@@ -10,7 +10,8 @@ contract SlotMachine is Ownable {
     uint public mMinBet;
     uint public mMaxBet;
     uint16 public mMaxPrize;
-    bytes32 public mName;
+    bytes16 public mName;
+    /*string public mName;*/
 
     bool public mIsGamePlaying;
 
@@ -26,10 +27,10 @@ contract SlotMachine is Ownable {
     uint8 public numOfPayLine;
 
     struct Game {
-        uint bet;
         bool betReady;
         bool bankerSeedReady;
         bool playerSeedReady;
+        uint bet;
         uint numOfLines;
         uint reward;
     }
@@ -87,7 +88,7 @@ contract SlotMachine is Ownable {
     }
 
     function SlotMachine(address _banker, uint16 _decider, uint _minBet, uint _maxBet, uint16 _maxPrize,
-      uint[2] _payTable, uint8 _numOfPayLine, bytes32 _mName)
+      uint[2] _payTable, uint8 _numOfPayLine, bytes16 _mName)
         payable
     {
         transferOwnership(_banker);
@@ -176,8 +177,8 @@ contract SlotMachine is Ownable {
         mGame[_idx].numOfLines = _lines;
         mGame[_idx].bet = _bet;
 
-        playerBalance -= _bet * _lines;
-        bankerBalance += _bet * _lines;
+        /*playerBalance -= _bet * _lines;
+        bankerBalance += _bet * _lines;*/
 
         mGame[_idx].betReady = true;
         gameInitialized(mPlayer, _bet, _lines, _idx);
@@ -226,7 +227,7 @@ contract SlotMachine is Ownable {
         uint8 ptr = (_idx <= 6) ? 0 : 1;
         targetPayline = payTable[ptr];
 
-        uint8 leftwalker = ((_idx <= 6) ? (_idx * 42) : ((_idx - 6) * 42)) + (-_indicator + 2) * 31;
+        uint8 leftwalker = ((_idx <= 6) ? (_idx * 42) : ((_idx - 6) * 42)) - (-_indicator + 2) * 31;
         uint8 rightwalker = ((_idx - 6 * ptr) - 1) * 42 + (_indicator - 1) * 11;
 
         return (targetPayline << (256 - leftwalker)) >> (256 - leftwalker + rightwalker);

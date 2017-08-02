@@ -1,4 +1,4 @@
-pragma solidity ^0.4.0;
+pragma solidity ^0.4.1;
 
 
 import 'zeppelin-solidity/contracts/ownership/Ownable.sol';
@@ -7,7 +7,7 @@ import './PaytableStorage.sol';
 
 contract SlotMachineStorage is Ownable {
     address public payStorage;
-    address[] public bankeraddress;
+    address[] public bankerAddress;
     mapping (address => address[]) public slotMachines;
     address[] public slotMachinesArray;
 
@@ -24,15 +24,15 @@ contract SlotMachineStorage is Ownable {
 
     function addBanker(address _banker, uint _slotnum) private {
         if (slotMachines[_banker].length == 0){
-          bankeraddress.push(_banker);
+          bankerAddress.push(_banker);
         }
     }
 
     function getNumOfBanker() constant returns (uint) {
-        return bankeraddress.length;
+        return bankerAddress.length;
     }
 
-    function createSlotMachine (address _banker,  uint16 _decider, uint _minBet, uint _maxBet, uint16 _maxPrize, bytes32 _name)
+    function createSlotMachine (address _banker,  uint16 _decider, uint _minBet, uint _maxBet, uint16 _maxPrize, bytes16 _name)
         onlyOwner
         returns (address)
     {
@@ -100,6 +100,22 @@ contract SlotMachineStorage is Ownable {
 
     function addSlotMachineInArray(address _slotaddr) private {
         slotMachinesArray.push(_slotaddr);
+    }
+
+    function getAllSlotMachinesArray() constant returns (address[]) {
+        return slotMachinesArray;
+    }
+
+    function getSlotMachines(address _banker) constant returns (address[]) {
+        return slotMachines[_banker];
+    }
+
+    function getSlotMachinesArray(uint from, uint to) constant returns (address[]) {
+        address[] memory ret = new address[](to - from + 1);
+        for (uint i=from; i<=to; i++){
+            ret[i-from] = slotMachinesArray[i];
+        }
+        return ret;
     }
 
     function setSlotMachineInArray(uint _idx, address _slotaddr)

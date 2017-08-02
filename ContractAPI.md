@@ -1,5 +1,17 @@
 #SlotMachine API 0.2v
+---
+0.21
+SlotMachineManager
+  - createSlotMachine(..., bytes32 mName) => createSlotMachine(..., bytes16 mName)
 
+SlotMachine
+  - bytes32 mName => bytes16 mName;
+
+SlotMachineStorage
+  - bankeraddress => bankerAddress
+  - getSlotMachinesArray(uint from, uint to)
+  - getSlotMachinesArray(uint from, uint to) constant returns (address[])
+  - getSlotMachines(address banker)
 ---
 0.2
 
@@ -114,7 +126,8 @@ SlotMachine
 ## SlotMachineStorage
 
 ### variable
-  - address[] bankeraddress
+
+  - address[] bankerAddress
 
     array of banker addresses
 
@@ -131,6 +144,14 @@ SlotMachine
     array of slotmachines regardless of banker
     removeSlotMachine through SlotMachineManager sets target slotmachine with '0x0000000000000000000000000000000000000000'  
     total length of slotMachinesArray can be achieved by *getLengthOfSlotMachinesArray()*
+
+  - getSlotMachinesArray(uint from, uint to)
+
+    get array of slotMachinesArray[from] to slotMachinesArray[to], including slotMachinesArray[to]
+
+  - getSlotMachinesArray(uint from, uint to) constant returns (address[])
+
+    get all elements of slotMachinesArray
 
     ```js
     manager.createSlotMachine(150,100,100000,2000);
