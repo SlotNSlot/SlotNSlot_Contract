@@ -11,7 +11,6 @@ contract SlotMachine is Ownable {
     uint public mMaxBet;
     uint16 public mMaxPrize;
     bytes16 public mName;
-    /*string public mName;*/
 
     bool public mIsGamePlaying;
 
@@ -177,8 +176,8 @@ contract SlotMachine is Ownable {
         mGame[_idx].numOfLines = _lines;
         mGame[_idx].bet = _bet;
 
-        /*playerBalance -= _bet * _lines;
-        bankerBalance += _bet * _lines;*/
+        playerBalance -= _bet * _lines;
+        bankerBalance += _bet * _lines;
 
         mGame[_idx].betReady = true;
         gameInitialized(mPlayer, _bet, _lines, _idx);
