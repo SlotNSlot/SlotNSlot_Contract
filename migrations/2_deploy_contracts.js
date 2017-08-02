@@ -40,10 +40,5 @@ module.exports = function(deployer) {
         })
       });
     });
-    // deployer.deploy(PaytableStorage);
-    //
-    // deployer.deploy(SlotMachine, '0x039238db5d08a93688749a3373d08942f33871f5',150,100,100000,2000
-    //     ,(new Array('0xb27e165e192c8ef85104bb1c2c26a0cac29c118819abe6fec402a2d85058805', '0xb2d05df3f42cb40fa03e8b2cfb7b87d2cb35d860fab2c3ca9625aca9e1e407d'))
-    //     ,12,'helloworld'
-    // );
+
 };

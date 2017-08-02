@@ -30,7 +30,7 @@ contract SlotMachine is Ownable {
         bool bankerSeedReady;
         bool playerSeedReady;
         uint bet;
-        uint numOfLines;
+        uint8 numOfLines;
         uint reward;
     }
 
@@ -71,11 +71,11 @@ contract SlotMachine is Ownable {
     event gameOccupied(address player, bytes32[3] playerSeed);
     event bankerSeedInitialized(bytes32[3] bankerSeed);
 
-    event gameInitialized(address player, uint bet, uint lines, uint idx);
-    event bankerSeedSet(bytes32 bankerSeed, uint idx);
-    event playerSeedSet(bytes32 playerSeed, uint idx);
+    event gameInitialized(address player, uint bet, uint8 lines, uint8 idx);
+    event bankerSeedSet(bytes32 bankerSeed, uint8 idx);
+    event playerSeedSet(bytes32 playerSeed, uint8 idx);
 
-    event gameConfirmed(uint reward, uint idx);
+    event gameConfirmed(uint reward, uint8 idx);
 
     function () payable {
       if (msg.sender == owner || tx.origin == owner) {
@@ -161,7 +161,7 @@ contract SlotMachine is Ownable {
         selfdestruct(owner);
     }
 
-    function initGameForPlayer(uint _bet, uint _lines, uint _idx)
+    function initGameForPlayer(uint _bet, uint8 _lines, uint8 _idx)
         onlyPlayer
         notBankrupt
     {
@@ -176,9 +176,6 @@ contract SlotMachine is Ownable {
         mGame[_idx].numOfLines = _lines;
         mGame[_idx].bet = _bet;
 
-        playerBalance -= _bet * _lines;
-        bankerBalance += _bet * _lines;
-
         mGame[_idx].betReady = true;
         gameInitialized(mPlayer, _bet, _lines, _idx);
 
@@ -188,7 +185,7 @@ contract SlotMachine is Ownable {
 
     }
 
-    function setBankerSeed(bytes32 _bankerSeed, uint _idx)
+    function setBankerSeed(bytes32 _bankerSeed, uint8 _idx)
         onlyOwner
     {
         require (previousBankerSeed[_idx] == sha3(_bankerSeed));
@@ -205,7 +202,7 @@ contract SlotMachine is Ownable {
     }
 
 
-    function setPlayerSeed(bytes32 _playerSeed, uint _idx)
+    function setPlayerSeed(bytes32 _playerSeed, uint8 _idx)
         onlyPlayer
     {
         require (previousPlayerSeed[_idx] == sha3(_playerSeed));
@@ -230,35 +227,43 @@ contract SlotMachine is Ownable {
         uint8 rightwalker = ((_idx - 6 * ptr) - 1) * 42 + (_indicator - 1) * 11;
 
         return (targetPayline << (256 - leftwalker)) >> (256 - leftwalker + rightwalker);
-
   	}
 
-    function confirmGame(uint _idx) private
+    function confirmGame(uint8 _idx) private
     {
         uint reward = 0;
         uint divider = 10000000000;
         bytes32 rnseed = sha3(previousBankerSeed[_idx] ^ previousPlayerSeed[_idx]);
         uint randomNumber = uint(rnseed) % divider;
+        uint8 numOfLines = mGame[_idx].numOfLines;
+        uint bet = mGame[_idx].bet;
+        uint[][] memory cmp = new uint[][](12);
 
-        for(uint j=0; j<mGame[_idx].numOfLines; j++){
+        for(uint8 k=0; k<12; k++){
+            cmp[k] = new uint[](2);
+            cmp[k][0] = getPayline(k+1,1);
+            cmp[k][1] = getPayline(k+1,2);
+        }
+
+        for(uint8 j=0; j<numOfLines; j++){
             randomNumber = uint(rnseed<<j) % divider;
             for(uint8 i=1; i<numOfPayLine; i++){
-                if(randomNumber < getPayline(i,2)){
-                    reward += getPayline(i,1);
+                if(randomNumber < cmp[i-1][1]){
+                    reward += cmp[i-1][0];
                     break;
                 }
             }
         }
-        reward = reward * mGame[_idx].bet;
+        reward = reward * bet;
 
         if (reward >= bankerBalance) {
             reward = bankerBalance;
         }
-        
+
         mGame[_idx].reward = reward;
 
-        bankerBalance -= reward;
-        playerBalance += reward;
+        bankerBalance = bankerBalance - reward + bet * numOfLines;
+        playerBalance = playerBalance + reward - bet * numOfLines;
 
         gameConfirmed(reward, _idx);
 

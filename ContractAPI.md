@@ -1,17 +1,27 @@
-#SlotMachine API 0.2v
+#SlotMachine API 0.21v
 ---
 0.21
+
 SlotMachineManager
   - createSlotMachine(..., bytes32 mName) => createSlotMachine(..., bytes16 mName)
 
 SlotMachine
   - bytes32 mName => bytes16 mName;
+  - initGameForPlayer(uint _bet, uint _lines, uint _idx) => initGameForPlayer(uint _bet, uint8 _lines, uint8 _idx)
+   - setBankerSeed(bytes32 _bankerSeed, uint _idx) => setBankerSeed(bytes32 _bankerSeed, uint8 _idx)
+   - setPlayerSeed(bytes32 _playerSeed, uint _idx) => setPlayerSeed(bytes32 _playerSeed, uint8 _idx)
+
+   - event gameInitialized(address player, uint bet, uint lines, uint idx) => gameInitialized(address player, uint bet, uint8 lines, uint8 idx);
+   - event bankerSeedSet(bytes32 bankerSeed, uint idx) => bankerSeedSet(bytes32 bankerSeed, uint8 idx);
+   - event playerSeedSet(bytes32 playerSeed, uint idx) => playerSeedSet(bytes32 playerSeed, uint8 idx);
+   - event gameConfirmed(uint reward, uint idx) => gameConfirmed(uint reward, uint8 idx);
 
 SlotMachineStorage
   - bankeraddress => bankerAddress
   - getSlotMachinesArray(uint from, uint to)
   - getSlotMachinesArray(uint from, uint to) constant returns (address[])
   - getSlotMachines(address banker)
+
 ---
 0.2
 
@@ -91,7 +101,7 @@ SlotMachine
 
 ###methods
 
-- createSlotMachine(uint _decider, uint _minBet, uint _maxBet, uint _maxPrize, bytes32 _name) returns (address)
+- createSlotMachine(uint _decider, uint _minBet, uint _maxBet, uint _maxPrize, bytes16 _name) returns (address)
 
   create slotmachine with following parameters  
   return address of created slotmachine  
@@ -153,6 +163,10 @@ SlotMachine
 
     get all elements of slotMachinesArray
 
+  - getSlotMachines(address banker)
+
+    get array of slotmachines of banker
+
     ```js
     manager.createSlotMachine(150,100,100000,2000);
 
@@ -204,7 +218,7 @@ SlotMachine
 
 ### variable
 
-  - bytes32 mName
+  - bytes16 mName
 
     name of SlotMachine
 
@@ -310,14 +324,14 @@ SlotMachine
     set initial banker seed  
     event : bankerSeedInitialized
 
-  - initGameForPlayer(uint _bet, uint _lines, uint _idx)
+  - initGameForPlayer(uint _bet, uint8 _lines, uint8 _idx)
 
     start slot game with parameters  
     event : gameInitialized
 
     if game is set properly, trigger event : gameConfirmed
 
-  - setBankerSeed(bytes32 _bankerSeed, uint _idx)
+  - setBankerSeed(bytes32 _bankerSeed, uint8 _idx)
 
     onlyBanker  
     set current game seed for banker  
@@ -325,7 +339,7 @@ SlotMachine
 
     if game is set properly, trigger event : gameConfirmed
 
-  - setPlayerSeed(bytes32 _playerSeed, uint _idx)
+  - setPlayerSeed(bytes32 _playerSeed, uint8 _idx)
 
     onlyPlayer  
     set current game seed for player  
@@ -363,24 +377,24 @@ SlotMachine
     - bankerSeed : initial seed for banker
 
 
-  - gameInitialized(address player, uint bet, uint lines, uint idx)
+  - gameInitialized(address player, uint bet, uint8 lines, uint8 idx)
     - player : address of player
     - bet : current game bet
     - lines : current game lines
     - idx : index of sha3chain
 
 
-  - bankerSeedSet(bytes32 bankerSeed, uint idx)
+  - bankerSeedSet(bytes32 bankerSeed, uint8 idx)
     - bankerSeed : current game seed for banker
     - idx : index of sha3chain
 
 
-  - playerSeedSet(bytes32 playerSeed, uint idx)
+  - playerSeedSet(bytes32 playerSeed, uint8 idx)
     - playerSeed : current game seed for banker
     - idx : index of sha3chain
 
 
-  - gameConfirmed(uint reward, uint idx)
+  - gameConfirmed(uint reward, uint8 idx)
     - reward : final reward for player  
     - idx : index of sha3chain
 
