@@ -233,7 +233,7 @@ contract SlotMachine is Ownable {
 
   	}
 
-    function confirmGame(uint _idx)
+    function confirmGame(uint _idx) private
     {
         uint reward = 0;
         uint divider = 10000000000;
@@ -251,6 +251,10 @@ contract SlotMachine is Ownable {
         }
         reward = reward * mGame[_idx].bet;
 
+        if (reward >= bankerBalance) {
+            reward = bankerBalance;
+        }
+        
         mGame[_idx].reward = reward;
 
         bankerBalance -= reward;
