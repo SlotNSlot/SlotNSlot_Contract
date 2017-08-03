@@ -29,8 +29,8 @@ contract('TestProxyLibrary', () => {
       var user2 = web3.eth.accounts[1];
       var playerNumbers = [1,1,1].map(function(x){return Math.random()});
       var bankerNumbers = [1,1,1].map(function(x){return Math.random()});
-      var playerSeeds = playerNumbers.map(function(x){return makeseed(x,10)});
-      var bankerSeeds = bankerNumbers.map(function(x){return makeseed(x,10)});
+      var playerSeeds = playerNumbers.map(function(x){return makeseed(x,100)});
+      var bankerSeeds = bankerNumbers.map(function(x){return makeseed(x,100)});
       function printBalance() {
         return (slot.playerBalance()).then(playerbalance=>{
           console.log('playerBalance : ', playerbalance.valueOf().toString());
@@ -38,8 +38,8 @@ contract('TestProxyLibrary', () => {
         });
       }
 
-      function playGame(bet, line, idx, chainnum) {
-        console.log('------GAME START!------');
+      function playGame(gameidx, bet, line, idx, chainnum) {
+        console.log('------GAME ',gameidx,' START!------');
         slot.initGameForPlayer(bet,line,idx,{from:user2});
         return slot.initGameForPlayer.estimateGas(bet,line,idx,{from:user2}).then(result=>{
           console.log('Game initialized, gasUsed : ', result);
@@ -55,11 +55,15 @@ contract('TestProxyLibrary', () => {
         }).then(result => {
           console.log('player initial betting : ', bet * line, 'player reward : ',result[5].valueOf().toString());
           console.log('player final prize : ', result[5] - bet * line);
-          // console.log('player reward : ',result[5].valueOf().toString());
           return printBalance();
         })
       }
 
+      async function letsplay(bet, line, gamenum) {
+        for(let i=0;i<gamenum;i++){
+          await playGame(i+1,bet,line,i%3,100-(Math.floor(i/3)+1));
+        }
+      }
       SlotMachineManager.deployed().then(function(instance) {
         slotManager = instance;
         return SlotMachineStorage.deployed().then(function(instance) {
@@ -97,43 +101,20 @@ contract('TestProxyLibrary', () => {
         slotaddr = result;
         console.log('slot address : ',slotaddr);
         slot = SlotMachine.at(slotaddr);
-        web3.eth.sendTransaction({from:user1,to:slotaddr,value:300000});
+        web3.eth.sendTransaction({from:user1,to:slotaddr,value:1000000});
         return slot.getInfo();
       }).then(slotinfo => {
         console.log(slotinfo);
-        slot.occupy(playerSeeds,{from:user2,value:200000});
+        slot.occupy(playerSeeds,{from:user2,value:1000000});
         console.log('slot occupied by player : ', user2);
         slot.initBankerSeed(bankerSeeds);
         return printBalance();
       }).then(result => {
         console.log('Bankerseeds are initialized');
-        return playGame(5000,20,0,9);
-      }).then(() => {
-        return playGame(4000,20,0,8);
-      }).then(() => {
-        return playGame(4000,20,0,7);
-      }).then(() => {
-        return playGame(4000,20,0,6);
-      }).then(() => {
-        return playGame(4000,20,0,5);    
+        return letsplay(5000,20,10);
+    
       })
-      //   slot.initGameForPlayer(5000,20,0,{from:user2});
-      //   return slot.initGameForPlayer.estimateGas(5000,20,0,{from:user2});
-      // }).then(result => {
-      //   console.log('Game initialized, gasUsed : ', result);
-      //   slot.setBankerSeed(makeseed(bankerNumbers[0],9),0);
-      //   return slot.setBankerSeed.estimateGas(makeseed(bankerNumbers[0],9),0);
-      // }).then(result => {
-      //   console.log('Banker seed is set, gasUsed : ', result);
-      //   slot.setPlayerSeed(makeseed(playerNumbers[0],9),0,{from:user2});
-      //   return slot.setPlayerSeed.estimateGas(makeseed(playerNumbers[0],9),0,{from:user2});
-      // }).then(result => {
-      //   console.log('Player seed is set, gasUsed : ', result);
-      //   return slot.mGame(0);
-      // }).then(result => {
-      //   console.log('player reward : ',result[5].valueOf().toString());
-      //   return printBalance();
-      // })
+
 
     });
   });
