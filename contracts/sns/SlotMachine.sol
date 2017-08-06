@@ -82,7 +82,9 @@ contract SlotMachine is Ownable {
       }
 
     }
-
+    /*
+        CONSTRUCTOR
+    */
     function SlotMachine(address _banker, uint16 _decider, uint _minBet, uint _maxBet, uint16 _maxPrize,
       uint[2] _payTable, uint8 _numOfPayLine, bytes16 _mName)
         payable
@@ -111,7 +113,6 @@ contract SlotMachine is Ownable {
         onlyAvailable
         notOccupied
     {
-
         require(msg.sender != owner);
 
         mPlayer = msg.sender;
@@ -142,6 +143,8 @@ contract SlotMachine is Ownable {
     function leave()
         onlyPlayer
     {
+        require(mGame[0].readyChecker == 0x0f && mGame[1].readyChecker == 0x0f && mGame[2].readyChecker == 0x0f);
+
         msg.sender.transfer(playerBalance);
         playerLeft(mPlayer, playerBalance);
         playerBalance = 0;
@@ -229,10 +232,11 @@ contract SlotMachine is Ownable {
         uint randomNumber = uint(rnseed) % divider;
         uint8 numOfLines = uint8(mGame[_idx].bet % 100);
         uint bet = mGame[_idx].bet - numOfLines;
-        uint[][] memory cmp = new uint[][](12);
+        uint8 numOfPayLines = numOfPayLine;
+        uint[][] memory cmp = new uint[][](numOfPayLines);
         uint bankerbalance = bankerBalance;
 
-        for(uint8 k=0; k<12; k++){
+        for(uint8 k=0; k<numOfPayLines; k++){
             cmp[k] = new uint[](2);
             cmp[k][0] = getPayline(k+1,1);
             cmp[k][1] = getPayline(k+1,2);
@@ -240,7 +244,7 @@ contract SlotMachine is Ownable {
 
         for(uint8 j=0; j<numOfLines; j++){
             randomNumber = uint(rnseed<<j) % divider;
-            for(uint8 i=1; i<numOfPayLine; i++){
+            for(uint8 i=1; i<numOfPayLines; i++){
                 if(randomNumber < cmp[i-1][1]){
                     reward += cmp[i-1][0];
                     break;
