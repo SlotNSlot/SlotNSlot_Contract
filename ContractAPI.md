@@ -1,4 +1,11 @@
-#SlotMachine API 0.21v
+#SlotMachine API 0.22v
+---
+0.22  
+General
+  - playing game optimization applied
+
+SlotMachine
+  - game Struct changed
 ---
 0.21
 
@@ -283,12 +290,9 @@ SlotMachine
 
     ```solidity
     struct Game {
-        uint bet;
-        bool betReady;
-        bool bankerSeedReady;
-        bool playerSeedReady;
-        uint numOfLines;
         uint reward;
+        uint bet;
+        bytes1 readyChecker;
     }
     ```
 
