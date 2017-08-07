@@ -1,5 +1,8 @@
 #SlotMachine API 0.22v
 ---
+0.23
+
+---
 0.22  
 General
   - playing game optimization applied

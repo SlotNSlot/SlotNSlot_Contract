@@ -36,8 +36,14 @@ contract SlotMachineStorage is Ownable {
         onlyOwner
         returns (address)
     {
-        uint[2] memory payTable = PaytableStorage(payStorage).getPayline(_maxPrize,_decider);
+        uint[2] memory payTableBase = PaytableStorage(payStorage).getPayline(_maxPrize,_decider);
         uint8 numOfPayLine = PaytableStorage(payStorage).getNumOfPayline(_maxPrize,_decider);
+        uint[24] memory payTable;
+
+        for(uint8 i=0; i<numOfPayLine; i++){
+            payTable[i*2] = getPayline(payTableBase,i+1,1);
+            payTable[i*2+1] = getPayline(payTableBase,i+1,2);
+        }
 
         address newslot = address(new SlotMachine(_banker, _decider, _minBet, _maxBet, _maxPrize, payTable, numOfPayLine, _name));
         addBanker(_banker, 1);
@@ -47,6 +53,14 @@ contract SlotMachineStorage is Ownable {
 
         totalNumOfSlotMachine++;
         return newslot;
+    }
+
+    function getPayline(uint[2] _payTableBase, uint8 _idx, uint8 _indicator) constant returns (uint) {
+        uint8 ptr = (_idx <= 6) ? 0 : 1;
+        uint8 leftwalker = ((_idx <= 6) ? (_idx * 42) : ((_idx - 6) * 42)) - (-_indicator + 2) * 31;
+        uint8 rightwalker = ((_idx - 6 * ptr) - 1) * 42 + (_indicator - 1) * 11;
+
+        return (_payTableBase[ptr] << (256 - leftwalker)) >> (256 - leftwalker + rightwalker);
     }
 
     function addSlotMachine(address _banker, address _slotaddr) private {

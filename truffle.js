@@ -15,7 +15,14 @@ module.exports = {
       host: 'localhost',
       port: 8545,
       gas: 4000000
+    },
+    ropsten: {
+      network_id: 3,
+      host: 'localhost',
+      port: 8545,
+      gas: 4000000
     }
+    
   },
   rpc: {
     host: 'localhost',
