@@ -21,11 +21,11 @@ contract('TestProxyLibrary', () => {
   describe('test', () => {
 
     it('works', () => {
-      const maxGameNum = 300;
+      const maxGameNum = 1100;
       const initialBankerBalance = web3.toWei(10,"ether");
       const initialPlayerBalance = web3.toWei(10,"ether");
       const gameBetting = web3.toWei(0.001,"ether");
-      const gamePlayNum = 200;
+      const gamePlayNum = 100;
       const gamePlayLine = 20;
 
       var slotManager, slotStorage, slot, slotaddr;
@@ -142,12 +142,20 @@ contract('TestProxyLibrary', () => {
         gasforBankerSeedInitializing += result;
         return letsplay(gameBetting,gamePlayLine,gamePlayNum);
       }).then(() => {
-        console.log('Player leaving..... player wallet balance : ',web3.fromWei(web3.eth.getBalance(user2),"ether"));
+        console.log('Player leaving.....');
+        console.log('banker wallet balance : ', web3.fromWei(web3.eth.getBalance(user1),"ether"));
+        console.log('player wallet balance : ',web3.fromWei(web3.eth.getBalance(user2),"ether"));
         slot.leave({from:user2,gas:1000000});
         return slot.leave.estimateGas({from:user2,gas:1000000});
       }).then(result => {
         console.log('player left the slot, gasUsed : ', result);
+        slot.shutDown({gas:1000000});
+        return slot.shutDown.estimateGas({gas:1000000});
+      }).then(result => {
+        console.log('banker closed the slot, gasUsed : ', result);
+        console.log('banker wallet balance : ', web3.fromWei(web3.eth.getBalance(user1),"ether"));
         console.log('player wallet balance : ',web3.fromWei(web3.eth.getBalance(user2),"ether"));
+
       })
 
 
