@@ -22,13 +22,35 @@ contract SlotMachine is Ownable {
     bool public initialPlayerSeedReady;
     bool public initialBankerSeedReady;
 
-    uint[2] public payTable;
+    uint[24] public payTable;
     uint8 public numOfPayLine;
 
     struct Game {
         uint reward;
-        uint bet;
-        bytes1 readyChecker;
+        uint info;
+
+        /*
+          structure of uint info
+
+          info = bet + lines + readyChecker
+
+          Base Condition
+          1. bet >= 100 wei
+          2. bet % 100 == 0
+          3. 1 <= lines <= 20
+          4. each method initGameForPlayer, setBankerSeed, setPlayerSeed
+            sets (readyChecker += 20)
+
+          If parameters are properly given,
+            info shoud be in form of
+            100000000000000 (bet)
+          +              10 (lines)
+          +              20 (readyChecker for initGameForPlayer)
+          +              20 (readyChecker for setBankerSeed)
+          +              20 (readyChecker for setPlayerSeed)
+          ------------------
+            100000000000070 => info
+        */
     }
 
     Game[3] public mGame;
@@ -86,7 +108,7 @@ contract SlotMachine is Ownable {
         CONSTRUCTOR
     */
     function SlotMachine(address _banker, uint16 _decider, uint _minBet, uint _maxBet, uint16 _maxPrize,
-      uint[2] _payTable, uint8 _numOfPayLine, bytes16 _mName)
+      uint[24] _payTable, uint8 _numOfPayLine, bytes16 _mName)
         payable
     {
         transferOwnership(_banker);
@@ -99,13 +121,17 @@ contract SlotMachine is Ownable {
         mMaxBet = _maxBet;
         mMaxPrize = _maxPrize;
         mIsGamePlaying = false;
-
         bankerBalance = msg.value;
 
-        payTable = _payTable;
         numOfPayLine = _numOfPayLine;
         initialBankerSeedReady = false;
         initialPlayerSeedReady = false;
+
+        for(uint8 k=0; k<_numOfPayLine; k++){
+            payTable[k*2] = _payTable[k*2];
+            payTable[k*2+1] = _payTable[k*2+1];
+        }
+
     }
 
     function occupy(bytes32[3] _playerSeed)
@@ -122,9 +148,6 @@ contract SlotMachine is Ownable {
         previousPlayerSeed[1] = _playerSeed[1];
         previousPlayerSeed[2] = _playerSeed[2];
 
-        mGame[0].readyChecker = 0x0f;
-        mGame[1].readyChecker = 0x0f;
-        mGame[2].readyChecker = 0x0f;
         initialPlayerSeedReady = true;
         gameOccupied(mPlayer, _playerSeed);
     }
@@ -143,7 +166,7 @@ contract SlotMachine is Ownable {
     function leave()
         onlyPlayer
     {
-        require(mGame[0].readyChecker == 0x0f && mGame[1].readyChecker == 0x0f && mGame[2].readyChecker == 0x0f);
+        require(mGame[0].info == 0 && mGame[1].info == 0 && mGame[2].info == 0);
 
         msg.sender.transfer(playerBalance);
         playerLeft(mPlayer, playerBalance);
@@ -171,14 +194,15 @@ contract SlotMachine is Ownable {
         require(_bet >= mMinBet && _bet <= mMaxBet && (_bet % 100 == 0) && _lines <= 20);
         require(_bet * _lines <= playerBalance);
 
-        mGame[_idx].bet = _bet + _lines;
-        mGame[_idx].readyChecker = mGame[_idx].readyChecker >> 1;
+        mGame[_idx].info += (_bet + _lines + 20);
+        uint betlines = mGame[_idx].info;
 
         gameInitialized(mPlayer, _bet, _lines, _idx);
 
-        if (mGame[_idx].readyChecker == 0x01){
+        if ((betlines % 100) >= 61 && (betlines % 100) <= 80) {
           confirmGame(_idx);
         }
+
     }
 
     function setBankerSeed(bytes32 _bankerSeed, uint8 _idx)
@@ -187,13 +211,16 @@ contract SlotMachine is Ownable {
         require (previousBankerSeed[_idx] == sha3(_bankerSeed));
 
         previousBankerSeed[_idx] = _bankerSeed;
-        mGame[_idx].readyChecker = mGame[_idx].readyChecker >> 1;
 
         bankerSeedSet(_bankerSeed, _idx);
 
-        if (mGame[_idx].readyChecker == 0x01){
+        mGame[_idx].info += 20;
+        uint betlines = mGame[_idx].info;
+
+        if ((betlines % 100) >= 61 && (betlines % 100) <= 80) {
           confirmGame(_idx);
         }
+
     }
 
 
@@ -203,50 +230,41 @@ contract SlotMachine is Ownable {
         require (previousPlayerSeed[_idx] == sha3(_playerSeed));
 
         previousPlayerSeed[_idx] = _playerSeed;
-        mGame[_idx].readyChecker = mGame[_idx].readyChecker >> 1;
 
         playerSeedSet(_playerSeed, _idx);
 
-        if (mGame[_idx].readyChecker == 0x01){
+        mGame[_idx].info += 20;
+        uint betlines = mGame[_idx].info;
+
+        if ((betlines % 100) >= 61 && (betlines % 100) <= 80) {
           confirmGame(_idx);
         }
+
     }
 
 
-    function getPayline(uint8 _idx, uint8 _indicator) constant returns (uint) {
-        uint targetPayline;
-        uint8 ptr = (_idx <= 6) ? 0 : 1;
-        targetPayline = payTable[ptr];
-
-        uint8 leftwalker = ((_idx <= 6) ? (_idx * 42) : ((_idx - 6) * 42)) - (-_indicator + 2) * 31;
-        uint8 rightwalker = ((_idx - 6 * ptr) - 1) * 42 + (_indicator - 1) * 11;
-
-        return (targetPayline << (256 - leftwalker)) >> (256 - leftwalker + rightwalker);
-  	}
 
     function confirmGame(uint8 _idx) private
     {
         uint reward = 0;
-        uint divider = 10000000000;
         bytes32 rnseed = sha3(previousBankerSeed[_idx] ^ previousPlayerSeed[_idx]);
-        uint randomNumber = uint(rnseed) % divider;
-        uint8 numOfLines = uint8(mGame[_idx].bet % 100);
-        uint bet = mGame[_idx].bet - numOfLines;
+        uint randomNumber = uint(rnseed) % 10000000000;
+        uint8 numOfLines = uint8((mGame[_idx].info % 100) - 60);
+        uint bet = mGame[_idx].info - numOfLines - 60;
         uint8 numOfPayLines = numOfPayLine;
-        uint[][] memory cmp = new uint[][](numOfPayLines);
         uint bankerbalance = bankerBalance;
+        uint[] memory cmp = new uint[](numOfPayLines*2);
 
         for(uint8 k=0; k<numOfPayLines; k++){
-            cmp[k] = new uint[](2);
-            cmp[k][0] = getPayline(k+1,1);
-            cmp[k][1] = getPayline(k+1,2);
+            cmp[k*2] = payTable[k*2];
+            cmp[k*2+1] = payTable[k*2+1];
         }
 
         for(uint8 j=0; j<numOfLines; j++){
-            randomNumber = uint(rnseed<<j) % divider;
+            randomNumber = uint(rnseed<<j) % 10000000000;
             for(uint8 i=1; i<numOfPayLines; i++){
-                if(randomNumber < cmp[i-1][1]){
-                    reward += cmp[i-1][0];
+                if(randomNumber < cmp[(i-1)*2+1]) {
+                    reward += cmp[(i-1)*2];
                     break;
                 }
             }
@@ -258,18 +276,16 @@ contract SlotMachine is Ownable {
         }
 
         mGame[_idx].reward = reward;
+        mGame[_idx].info = 0;
 
         bankerBalance = bankerbalance - reward + bet * numOfLines;
         playerBalance = playerBalance + reward - bet * numOfLines;
 
         gameConfirmed(reward, _idx);
 
-        mGame[_idx].readyChecker = 0x0f;
-
     }
 
-    function getInfo() constant returns (uint16, uint, uint, uint16, uint) {
-      //todo : add return values
-        return (mDecider, mMinBet, mMaxBet, mMaxPrize, bankerBalance);
+    function getInfo() constant returns (address, address, bytes16, uint16, uint, uint, uint16, uint) {
+        return (mPlayer, owner, mName, mDecider, mMinBet, mMaxBet, mMaxPrize, bankerBalance);
     }
 }

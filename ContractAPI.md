@@ -1,4 +1,16 @@
-#SlotMachine API 0.22v
+#SlotMachine API 0.23v
+
+---
+0.23  
+SlotMachine
+
+  - *getInfo* modified
+  - game struct modified
+
+SlotMachineStorage
+
+  - *getPayLine* added
+
 ---
 0.22  
 General
@@ -291,8 +303,7 @@ SlotMachine
     ```solidity
     struct Game {
         uint reward;
-        uint bet;
-        bytes1 readyChecker;
+        uint info;
     }
     ```
 
@@ -310,9 +321,9 @@ SlotMachine
 
 ### methods
 
-  - getInfo() constant returns (uint16, uint, uint, uint16, uint)  
+  - getInfo() constant returns (address, address, bytes16, uint16, uint, uint, uint16, uint)
 
-    return (mDecider, mMinBet, mMaxBet, mMaxPrize, bankerBalance);
+    return (mPlayer, owner, mName, mDecider, mMinBet, mMaxBet, mMaxPrize, bankerBalance);
 
 
   - occupy(bytes32[3] _playerSeed)
