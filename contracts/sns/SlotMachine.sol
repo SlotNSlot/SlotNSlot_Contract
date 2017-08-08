@@ -189,7 +189,6 @@ contract SlotMachine is Ownable {
 
     function initGameForPlayer(uint _bet, uint8 _lines, uint8 _idx)
         onlyPlayer
-        notBankrupt
     {
         require(_bet >= mMinBet && _bet <= mMaxBet && (_bet % 100 == 0) && _lines <= 20);
         require(_bet * _lines <= playerBalance);
