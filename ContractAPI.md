@@ -1,4 +1,10 @@
 #SlotMachine API 0.23v
+---
+0.24
+
+SlotMachine
+  - mBankrupt deleted
+  - banker(owner) can call *leave* for kick player
 
 ---
 0.23  
@@ -304,6 +310,38 @@ SlotMachine
     struct Game {
         uint reward;
         uint info;
+
+        /*
+          structure of uint info
+
+          info = bet + lines + readyChecker
+
+          Base Condition
+          1. bet >= 100 wei
+          2. bet % 100 == 0
+          3. 1 <= lines <= 20
+          4. each method initGameForPlayer, setBankerSeed, setPlayerSeed
+            sets (readyChecker += 20)
+
+          If parameters are properly given,
+            info shoud be in form of
+            100000000000000 (bet)
+          +            1000 (lines * 100)
+          +              10 (readyChecker for initGameForPlayer)
+          +              20 (readyChecker for setBankerSeed)
+          +              40 (readyChecker for setPlayerSeed)
+          ------------------
+            100000000001070 => info
+
+          e.g)  200000000001540 => info
+                200000000000000 => bet
+                           1500 => lines * 100 => lines = 15
+                             50 => ready for initGameForPlayer & setPlayerSeed,
+                                   not ready for setBankerSeed
+
+
+        */
+
     }
     ```
 

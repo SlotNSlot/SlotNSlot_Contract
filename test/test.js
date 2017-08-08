@@ -25,7 +25,7 @@ contract('TestProxyLibrary', () => {
       const initialBankerBalance = web3.toWei(10,"ether");
       const initialPlayerBalance = web3.toWei(10,"ether");
       const gameBetting = web3.toWei(0.001,"ether");
-      const gamePlayNum = 100;
+      const gamePlayNum = 200;
       const gamePlayLine = 20;
 
       var slotManager, slotStorage, slot, slotaddr;

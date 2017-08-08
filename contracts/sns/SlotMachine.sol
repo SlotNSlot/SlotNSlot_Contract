@@ -4,7 +4,6 @@ import 'zeppelin-solidity/contracts/ownership/Ownable.sol';
 
 contract SlotMachine is Ownable {
     bool public mAvailable;
-    bool public mBankrupt;
     address public mPlayer;
     uint16 public mDecider;
     uint public mMinBet;
@@ -44,12 +43,20 @@ contract SlotMachine is Ownable {
           If parameters are properly given,
             info shoud be in form of
             100000000000000 (bet)
-          +              10 (lines)
-          +              20 (readyChecker for initGameForPlayer)
+          +            1000 (lines * 100)
+          +              10 (readyChecker for initGameForPlayer)
           +              20 (readyChecker for setBankerSeed)
-          +              20 (readyChecker for setPlayerSeed)
+          +              40 (readyChecker for setPlayerSeed)
           ------------------
-            100000000000070 => info
+            100000000001070 => info
+
+          e.g)  200000000001540 => info
+                200000000000000 => bet
+                           1500 => lines * 100 => lines = 15
+                             50 => ready for initGameForPlayer & setPlayerSeed,
+                                   not ready for setBankerSeed
+
+
         */
     }
 
@@ -59,11 +66,6 @@ contract SlotMachine is Ownable {
     */
     modifier onlyAvailable() {
         require(mAvailable);
-        _;
-    }
-
-    modifier notBankrupt() {
-        require(!mBankrupt);
         _;
     }
 
@@ -116,7 +118,6 @@ contract SlotMachine is Ownable {
         mDecider = _decider;
         mPlayer = 0x0;
         mAvailable = true;
-        mBankrupt = false;
         mMinBet = _minBet;
         mMaxBet = _maxBet;
         mMaxPrize = _maxPrize;
@@ -164,15 +165,14 @@ contract SlotMachine is Ownable {
     }
 
     function leave()
-        onlyPlayer
     {
         require(mGame[0].info == 0 && mGame[1].info == 0 && mGame[2].info == 0);
+        require(msg.sender == mPlayer || msg.sender == owner);
 
         msg.sender.transfer(playerBalance);
         playerLeft(mPlayer, playerBalance);
         playerBalance = 0;
         mAvailable = true;
-        mBankrupt = false;
         mPlayer = 0x0;
         mIsGamePlaying = false;
         initialBankerSeedReady = false;
@@ -194,12 +194,12 @@ contract SlotMachine is Ownable {
         require(_bet >= mMinBet && _bet <= mMaxBet && (_bet % 100 == 0) && _lines <= 20);
         require(_bet * _lines <= playerBalance);
 
-        mGame[_idx].info += (_bet + _lines + 20);
+        mGame[_idx].info = (_bet + uint(_lines)*100 + 10);
         uint betlines = mGame[_idx].info;
 
         gameInitialized(mPlayer, _bet, _lines, _idx);
 
-        if ((betlines % 100) >= 61 && (betlines % 100) <= 80) {
+        if ((betlines % 100) == 70) {
           confirmGame(_idx);
         }
 
@@ -217,7 +217,7 @@ contract SlotMachine is Ownable {
         mGame[_idx].info += 20;
         uint betlines = mGame[_idx].info;
 
-        if ((betlines % 100) >= 61 && (betlines % 100) <= 80) {
+        if ((betlines % 100) == 70) {
           confirmGame(_idx);
         }
 
@@ -233,10 +233,10 @@ contract SlotMachine is Ownable {
 
         playerSeedSet(_playerSeed, _idx);
 
-        mGame[_idx].info += 20;
+        mGame[_idx].info += 40;
         uint betlines = mGame[_idx].info;
 
-        if ((betlines % 100) >= 61 && (betlines % 100) <= 80) {
+        if ((betlines % 100) == 70) {
           confirmGame(_idx);
         }
 
@@ -249,8 +249,8 @@ contract SlotMachine is Ownable {
         uint reward = 0;
         bytes32 rnseed = sha3(previousBankerSeed[_idx] ^ previousPlayerSeed[_idx]);
         uint randomNumber = uint(rnseed) % 10000000000;
-        uint8 numOfLines = uint8((mGame[_idx].info % 100) - 60);
-        uint bet = mGame[_idx].info - numOfLines - 60;
+        uint8 numOfLines = uint8((mGame[_idx].info % 10000)/100);
+        uint bet = (mGame[_idx].info/10000)*10000;
         uint8 numOfPayLines = numOfPayLine;
         uint bankerbalance = bankerBalance;
         uint[] memory cmp = new uint[](numOfPayLines*2);
