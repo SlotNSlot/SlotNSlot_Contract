@@ -18,8 +18,8 @@ contract SlotNSlotICOWallet is MultiSigWallet {
     event YearlyLimitChange(uint _yearlyLimit);
 
     function SlotNSlotICOWallet(address[] _owners, uint _required, uint _yearlyLimit)
-        public
-        MultiSigWallet(_owners, _required)
+    public
+    MultiSigWallet(_owners, _required)
     {
         mYearlyLimit = _yearlyLimit;
         mAllowThisYear = mYearlyLimit;
