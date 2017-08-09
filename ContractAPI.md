@@ -261,15 +261,12 @@ SlotMachine
     true if slot is not occupied by player  
     false if slot is occupied
 
-
-  - bool public mBankrupt
-
   - address mPlayer
 
     address of current player  
     if slot is not occupied, mPlayer = '0x0'    
 
-  - uint mDecider
+  - uint16 mDecider
 
     hit rate of slotmachine * 1000  
     e.g) hit rate : 15%(0.15) => mDecider : 150
@@ -282,16 +279,11 @@ SlotMachine
 
     maxBet of slotmachine(wei)
 
-  - uint mMaxPrize
-
-  - uint bankerBalance
-
-    banker's balance in slotmachine (wei)
+  - uint16 mMaxPrize
 
   - uint playerBalance
 
     player's balance in slotmachine (wei)
-
 
   - bool public initialPlayerSeedReady
 
@@ -411,7 +403,7 @@ SlotMachine
   - leave()  
 
     access : Player or Banker
-    
+
     player leaves the game  
     give back the balance to player  
     event : playerLeft

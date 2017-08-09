@@ -96,11 +96,12 @@ contract SlotMachine is Ownable {
     event gameConfirmed(uint reward, uint8 idx);
 
     function () payable {
-      if (msg.sender == owner || tx.origin == owner) {
-        /*bankerBalance += msg.value;*/
-      } else if(msg.sender == mPlayer) {
+      if(msg.sender == mPlayer) {
         playerBalance += msg.value;
+      } else if (msg.sender != owner) {
+        throw;
       }
+
 
     }
     /*
