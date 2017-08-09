@@ -1,29 +1,29 @@
 {
-  "name": "slotnslot-contract",
-  "version": "1.0.0",
-  "description": "",
-  "main": "truffle.js",
-  "directories": {
-    "test": "test"
-  },
-  "dependencies": {
-    "zeppelin-solidity": "^1.2.0"
-  },
-  "devDependencies": {
-    "husky": "^0.14.3"
-  },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "prepush": "truffle compile"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/SlotNSlot/SlotNSlot_Contract.git"
-  },
-  "author": "Slot N Slot",
-  "license": "GPL-3.0",
-  "bugs": {
-    "url": "https://github.com/SlotNSlot/SlotNSlot_Contract/issues"
-  },
-  "homepage": "https://github.com/SlotNSlot/SlotNSlot_Contract#readme"
+    "name": "slotnslot-contract",
+    "version": "1.0.0",
+    "description": "",
+    "main": "truffle.js",
+    "directories": {
+        "test": "test"
+    },
+    "dependencies": {
+        "zeppelin-solidity": "^1.2.0"
+    },
+    "devDependencies": {
+        "husky": "^0.14.3"
+    },
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "prepush": "truffle compile"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/SlotNSlot/SlotNSlot_Contract.git"
+    },
+    "author": "Slot N Slot",
+    "license": "GPL-3.0",
+    "bugs": {
+        "url": "https://github.com/SlotNSlot/SlotNSlot_Contract/issues"
+    },
+    "homepage": "https://github.com/SlotNSlot/SlotNSlot_Contract#readme"
 }
