@@ -106,14 +106,14 @@ contract('TestProxyLibrary', () => {
         assert.equal(result, 0, 'There are already some slotmachines in storage');
         console.log('Initializing test completed successfully');
         console.log('Creating test start');
-        slotManager.createSlotMachine(100, 1, web3.toWei(1,"ether"), 1000, 'test1',{gas:4000000});
+        slotManager.createSlotMachine(100, 10000, web3.toWei(1,"ether"), 1000, 'test1',{gas:4000000});
         return slotStorage.totalNumOfSlotMachine();
       })
       .then(result => {
         assert.equal(result, 1, 'creating test1 failed');
         console.log('Slotmachine1 is created successfully');
-        slotManager.createSlotMachine(125, 1, web3.toWei(1,"ether"), 2000, 'test2',{gas:4000000});
-        return slotManager.createSlotMachine.estimateGas(125, 1, web3.toWei(1,"ether"), 2000, 'test2',{gas:4000000});
+        slotManager.createSlotMachine(125, 10000, web3.toWei(1,"ether"), 2000, 'test2',{gas:4000000});
+        return slotManager.createSlotMachine.estimateGas(125, 10000, web3.toWei(1,"ether"), 2000, 'test2',{gas:4000000});
       })
       .then(result => {
         console.log('Creating test completed successfully, gasUsed : ', result);

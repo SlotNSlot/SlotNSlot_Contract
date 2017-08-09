@@ -1,11 +1,19 @@
-#SlotMachine API 0.23v
+#SlotMachine API 0.25v
+---
+0.25
+
+SlotMachine
+  - mIsGamePlaying deleted
+  - variable bankerBalance deleted
+  - method *bankerBalance* added
+
 ---
 0.24
 
 SlotMachine
   - mBankrupt deleted
   - banker(owner) can call *leave* for kick player
-
+  - game struct explanation added
 ---
 0.23  
 SlotMachine
@@ -402,8 +410,8 @@ SlotMachine
 
   - leave()  
 
-    onlyPlayer  
-    access : onlyPlayer  
+    access : Player or Banker
+    
     player leaves the game  
     give back the balance to player  
     event : playerLeft

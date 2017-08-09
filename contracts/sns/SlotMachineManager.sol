@@ -33,8 +33,11 @@ contract SlotMachineManager {
 
 
     function createSlotMachine(uint16 _decider, uint _minBet, uint _maxBet, uint16 _maxPrize, bytes16 _name)
+        payable
         returns (address)
     {
+        //TODO : minbet verification
+        require(_minBet >= 10000);
         address newslot;
         newslot = slotmachineStorage.createSlotMachine(msg.sender, _decider, _minBet, _maxBet, _maxPrize, _name);
         return newslot;
