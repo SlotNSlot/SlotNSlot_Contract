@@ -1,9 +1,9 @@
 pragma solidity ^0.4.0;
 
 
-import 'zeppelin-solidity/contracts/math/SafeMath.sol';
-import 'zeppelin-solidity/contracts/token/ERC20.sol';
-import 'zeppelin-solidity/contracts/ownership/Ownable.sol';
+import "zeppelin-solidity/contracts/math/SafeMath.sol";
+import "zeppelin-solidity/contracts/token/ERC20.sol";
+import "zeppelin-solidity/contracts/ownership/Ownable.sol";
 
 /**
  * @title SLOTToken
@@ -11,9 +11,9 @@ import 'zeppelin-solidity/contracts/ownership/Ownable.sol';
 contract SLOTToken is ERC20, Ownable {
     using SafeMath for uint256;
 
-    string public constant name = 'SlotNSlot';
+    string public constant name = "SlotNSlot";
 
-    string public constant symbol = 'SLOT';
+    string public constant symbol = "SLOT";
 
     uint public constant decimals = 18;
 
@@ -194,7 +194,8 @@ contract SLOTToken is ERC20, Ownable {
      */
     function finishMinting()
     onlyOwner
-    returns (bool) {
+    returns (bool)
+    {
         mMintingFinished = true;
         MintFinished();
 
