@@ -31,6 +31,7 @@ contract('TestProxyLibrary', () => {
       var slotManager, slotStorage, slot, slotaddr;
       var dispatcherStorage;
       var bankerBalance, playerBalance;
+      var bankerBalanceBefore, playerBalanceBefore;
 
       var gasforCreating = 0;
       var gasforPlayerSeedInitializing = 0;
@@ -68,10 +69,10 @@ contract('TestProxyLibrary', () => {
         }).then(result => {
           console.log('Player seed is set, gasUsed : ', result);
           gasforPlayerSeedSetting += result;
-          return slot.mGame(idx);
+          return slot.mGameInfo(idx);
         }).then(result => {
-          console.log('player initial betting : ', bet * line, 'player reward : ',result[0].valueOf().toString());
-          console.log('player final prize : ', result[0] - bet * line);
+          console.log('player initial betting : ', bet * line, 'player reward : ',result.valueOf().toString());
+          console.log('player final prize : ', result - bet * line);
           return printBalance();
         })
       }
@@ -130,6 +131,8 @@ contract('TestProxyLibrary', () => {
         return slot.getInfo();
       }).then(slotinfo => {
         console.log(slotinfo);
+        bankerBalanceBefore = web3.fromWei(web3.eth.getBalance(user1),"ether");
+        playerBalanceBefore = web3.fromWei(web3.eth.getBalance(user2),"ether");
         slot.occupy(playerSeeds,{from:user2,value:initialPlayerBalance,gas:1000000});
         return slot.occupy.estimateGas(playerSeeds,{from:user2,value:10000000});
       }).then(result => {
@@ -153,6 +156,9 @@ contract('TestProxyLibrary', () => {
         return slot.shutDown.estimateGas({gas:1000000});
       }).then(result => {
         console.log('banker closed the slot, gasUsed : ', result);
+        console.log('banker wallet balance before : ', bankerBalanceBefore);
+        console.log('player wallet balance before: ',playerBalanceBefore);
+
         console.log('banker wallet balance : ', web3.fromWei(web3.eth.getBalance(user1),"ether"));
         console.log('player wallet balance : ',web3.fromWei(web3.eth.getBalance(user2),"ether"));
 

@@ -1,4 +1,11 @@
-#SlotMachine API 0.25v
+#SlotMachine API 0.26v
+---
+0.26
+
+SlotMachine
+  - game struct removed
+  - mGameInfo added
+  
 ---
 0.25
 

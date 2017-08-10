@@ -1,8 +1,6 @@
 pragma solidity ^0.4.0;
 
-//import "./SlotLib.sol";
 import "./SlotMachineStorage.sol";
-
 import "./LibInterface.sol";
 
 contract SlotMachineManager {
@@ -14,7 +12,7 @@ contract SlotMachineManager {
         require(msg.sender == admin);
         _;
     }
-    
+
     event slotMachineCreated(address _banker, uint16 _decider, uint _minBet, uint _maxBet, uint16 _maxPrize, uint _totalnum, address _slotaddr);
     event slotMachineRemoved(address _banker, address _slotaddr, uint _totalnum);
 
@@ -31,12 +29,9 @@ contract SlotMachineManager {
         return slotmachineStorage;
     }
 
-
     function createSlotMachine(uint16 _decider, uint _minBet, uint _maxBet, uint16 _maxPrize, bytes16 _name)
-        payable
         returns (address)
     {
-        //TODO : minbet verification
         require(_minBet >= 10000);
         address newslot;
         newslot = slotmachineStorage.createSlotMachine(msg.sender, _decider, _minBet, _maxBet, _maxPrize, _name);
