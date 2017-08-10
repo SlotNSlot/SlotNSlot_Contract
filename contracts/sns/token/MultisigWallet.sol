@@ -372,8 +372,7 @@ contract MultiSigWallet {
         uint count = 0;
         uint i;
         for (i = 0; i < transactionCount; i++) {
-            if ((pending && !transactions[i].executed) || (executed && transactions[i].executed))
-            {
+            if ((pending && !transactions[i].executed) || (executed && transactions[i].executed)) {
                 transactionIdsTemp[count] = i;
                 count += 1;
             }

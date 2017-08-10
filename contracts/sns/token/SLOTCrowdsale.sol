@@ -115,9 +115,15 @@ contract SLOTCrowdsale {
     constant
     returns (uint o_rate)
     {
-        if (now <= mStartTime + EARLY_BIRD_DURATION) return PRICE_EARLY_BIRD;
-        if (now <= mEndTime) return PRICE_NORMAL;
-        else return 0;
+        if (now <= mStartTime + EARLY_BIRD_DURATION) {
+            return PRICE_EARLY_BIRD;
+        }
+
+        if (now <= mEndTime) {
+            return PRICE_NORMAL;
+        } else {
+            return 0;
+        }
     }
 
     function processPurchase(uint _rate)
