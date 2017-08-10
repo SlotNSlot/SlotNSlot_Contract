@@ -17,11 +17,10 @@ library SlotLib {
     function removeSlotMachine (address _slotmachineStorage, address _banker, address _slotaddr) {
         uint totalnum = SlotMachineStorage(_slotmachineStorage).getNumOfSlotMachine(_banker);
         bool startRemove = false;
-        for (uint i = 0; i < totalnum ; i++){
+        for (uint i = 0; i < totalnum ; i++) {
             if (startRemove) {
                 SlotMachineStorage(_slotmachineStorage).setSlotMachine(_banker, i, SlotMachineStorage(_slotmachineStorage).getSlotMachine(_banker, i + 1));
-            }
-            else if (SlotMachineStorage(_slotmachineStorage).getSlotMachine(_banker, i) == _slotaddr) {
+            } else if (SlotMachineStorage(_slotmachineStorage).getSlotMachine(_banker, i) == _slotaddr) {
                 startRemove = true;
                 SlotMachineStorage(_slotmachineStorage).setSlotMachine(_banker, i, SlotMachineStorage(_slotmachineStorage).getSlotMachine(_banker, i + 1));
             }
