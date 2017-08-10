@@ -91,11 +91,10 @@ contract SlotMachine is Ownable {
     event gameConfirmed(uint reward, uint8 idx);
 
     function () payable {
-      if (msg.sender == mPlayer) {
-        playerBalance += msg.value;
-      } else {
-          require(msg.sender == owner);
-      }
+        require(msg.sender == mPlayer || msg.sender == owner);
+        if (msg.sender == mPlayer) {
+            playerBalance += msg.value;
+        }
     }
     /*
         CONSTRUCTOR
