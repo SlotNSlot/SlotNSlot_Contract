@@ -1,9 +1,8 @@
 pragma solidity ^0.4.1;
 
-
-import 'zeppelin-solidity/contracts/ownership/Ownable.sol';
+import "zeppelin-solidity/contracts/ownership/Ownable.sol";
 import "./SlotMachine.sol";
-import './PaytableStorage.sol';
+import "./PaytableStorage.sol";
 
 contract SlotMachineStorage is Ownable {
     address public payStorage;
@@ -22,13 +21,18 @@ contract SlotMachineStorage is Ownable {
         payStorage = _payStorage;
     }
 
-    function addBanker(address _banker, uint _slotnum) private {
-        if (slotMachines[_banker].length == 0){
+    function addBanker(address _banker, uint _slotnum)
+        private
+    {
+        if (slotMachines[_banker].length == 0) {
           bankerAddress.push(_banker);
         }
     }
 
-    function getNumOfBanker() constant returns (uint) {
+    function getNumOfBanker()
+        constant
+        returns (uint)
+    {
         return bankerAddress.length;
     }
 
@@ -40,7 +44,7 @@ contract SlotMachineStorage is Ownable {
         uint8 numOfPayLine = PaytableStorage(payStorage).getNumOfPayline(_maxPrize,_decider);
         uint[24] memory payTable;
 
-        for(uint8 i=0; i<numOfPayLine; i++){
+        for (uint8 i = 0; i < numOfPayLine; i++) {
             payTable[i*2] = getPayline(payTableBase,i+1,1);
             payTable[i*2+1] = getPayline(payTableBase,i+1,2);
         }
@@ -83,50 +87,68 @@ contract SlotMachineStorage is Ownable {
     }
 
     function getNumOfSlotMachine(address _banker)
-        constant returns (uint)
+        constant
+        returns (uint)
     {
         return slotMachines[_banker].length;
     }
 
     function getSlotMachine(address _banker, uint _idx)
-        constant returns(address)
+        constant
+        returns(address)
     {
         if (_idx < slotMachines[_banker].length) {
           return slotMachines[_banker][_idx];
-        }
-        else {
+        } else {
           return 0x0;
         }
     }
 
     function getIdxOfSlotMachine(address _banker, address _slotaddr)
-        constant returns (uint)
+        constant
+        returns (uint)
     {
         uint totalnum = getNumOfSlotMachine(_banker);
-        for (uint i=0;i<totalnum;i++) {
-            if(slotMachines[_banker][i] == _slotaddr) return i;
+        for (uint i = 0; i < totalnum; i++) {
+            if (slotMachines[_banker][i] == _slotaddr) {
+                return i;
+            }
         }
     }
 
-    function getLengthOfSlotMachinesArray() constant returns (uint) {
+    function getLengthOfSlotMachinesArray()
+        constant
+        returns (uint)
+    {
         return slotMachinesArray.length;
     }
 
-    function addSlotMachineInArray(address _slotaddr) private {
+    function addSlotMachineInArray(address _slotaddr)
+        private
+    {
         slotMachinesArray.push(_slotaddr);
     }
 
-    function getAllSlotMachinesArray() constant returns (address[]) {
+    function getAllSlotMachinesArray()
+        constant
+        returns (address[])
+    {
         return slotMachinesArray;
     }
 
-    function getSlotMachines(address _banker) constant returns (address[]) {
+    function getSlotMachines(address _banker)
+        constant
+        returns (address[])
+    {
         return slotMachines[_banker];
     }
 
-    function getSlotMachinesArray(uint from, uint to) constant returns (address[]) {
+    function getSlotMachinesArray(uint from, uint to)
+        constant
+        returns (address[])
+    {
         address[] memory ret = new address[](to - from + 1);
-        for (uint i=from; i<=to; i++){
+        for (uint i = from; i <= to; i++) {
             ret[i-from] = slotMachinesArray[i];
         }
         return ret;
@@ -139,11 +161,14 @@ contract SlotMachineStorage is Ownable {
     }
 
     function getIdxOfSlotMachinesArray(address _slotaddr)
-        constant returns (uint)
+        constant
+        returns (uint)
     {
         uint totalnum = slotMachinesArray.length;
-        for (uint i=0;i<totalnum;i++) {
-            if(slotMachinesArray[i] == _slotaddr) return i;
+        for (uint i = 0;i < totalnum; i++) {
+            if (slotMachinesArray[i] == _slotaddr) {
+                return i;
+            }
         }
     }
 }

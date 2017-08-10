@@ -1,6 +1,6 @@
 pragma solidity ^0.4.1;
 
-import 'zeppelin-solidity/contracts/ownership/Ownable.sol';
+import "zeppelin-solidity/contracts/ownership/Ownable.sol";
 
 contract SlotMachine is Ownable {
     bool public mAvailable;
@@ -116,7 +116,7 @@ contract SlotMachine is Ownable {
         initialBankerSeedReady = false;
         initialPlayerSeedReady = false;
 
-        for(uint8 k=0; k<_numOfPayLine; k++){
+        for (uint8 k = 0; k<_numOfPayLine; k++) {
             payTable[k*2] = _payTable[k*2];
             payTable[k*2+1] = _payTable[k*2+1];
         }
@@ -152,8 +152,7 @@ contract SlotMachine is Ownable {
         bankerSeedInitialized(_bankerSeed);
     }
 
-    function leave()
-    {
+    function leave() {
         require(msg.sender == mPlayer || msg.sender == owner);
 
         mPlayer.transfer(playerBalance);
@@ -179,7 +178,7 @@ contract SlotMachine is Ownable {
         require(_bet * _lines <= playerBalance);
         require(initialPlayerSeedReady && initialBankerSeedReady);
 
-        if(mGameInfo[_idx] % 10 == 1) {
+        if (mGameInfo[_idx] % 10 == 1) {
             mGameInfo[_idx] = (_bet + uint(_lines) * 100 + 10);
         } else {
             mGameInfo[_idx] += (_bet + uint(_lines) * 100 + 10);
@@ -204,7 +203,7 @@ contract SlotMachine is Ownable {
 
         bankerSeedSet(_bankerSeed, _idx);
 
-        if(mGameInfo[_idx] % 10 == 1) {
+        if (mGameInfo[_idx] % 10 == 1) {
             mGameInfo[_idx] = 20;
         } else {
             mGameInfo[_idx] += 20;
@@ -229,7 +228,7 @@ contract SlotMachine is Ownable {
 
         playerSeedSet(_playerSeed, _idx);
 
-        if(mGameInfo[_idx] % 10 == 1) {
+        if (mGameInfo[_idx] % 10 == 1) {
             mGameInfo[_idx] = 40;
         } else {
             mGameInfo[_idx] += 40;
@@ -245,7 +244,8 @@ contract SlotMachine is Ownable {
 
 
 
-    function confirmGame(uint8 _idx) private
+    function confirmGame(uint8 _idx)
+        private
     {
         uint reward = 0;
         bytes32 rnseed = sha3(previousBankerSeed[_idx] ^ previousPlayerSeed[_idx]);
@@ -256,15 +256,15 @@ contract SlotMachine is Ownable {
         uint bankerbalance = this.balance - playerBalance;
         uint[] memory cmp = new uint[](numOfPayLines*2);
 
-        for(uint8 k=0; k<numOfPayLines; k++){
+        for (uint8 k = 0; k < numOfPayLines; k++) {
             cmp[k*2] = payTable[k*2];
             cmp[k*2+1] = payTable[k*2+1];
         }
 
-        for(uint8 j=0; j<numOfLines; j++){
+        for (uint8 j = 0; j < numOfLines; j++) {
             randomNumber = uint(rnseed<<j) % 10000000000;
-            for(uint8 i=1; i<numOfPayLines; i++){
-                if(randomNumber < cmp[(i-1)*2+1]) {
+            for (uint8 i = 1; i < numOfPayLines; i++) {
+                if (randomNumber < cmp[(i-1)*2+1]) {
                     reward += cmp[(i-1)*2];
                     break;
                 }

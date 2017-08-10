@@ -71,10 +71,10 @@ contract SLOTToken is ERC20, Ownable {
      * @param _value The amount to be transferred.
      */
     function transfer(address _to, uint256 _value)
-    afterCrowdsale
-    returns (bool)
+        afterCrowdsale
+        returns (bool)
     {
-        if(now < mLockEndTime) {
+        if (now < mLockEndTime) {
             transferLiquidBalances(msg.sender, _to, _value);
         }
 
@@ -91,8 +91,8 @@ contract SLOTToken is ERC20, Ownable {
      * @return An uint256 representing the amount owned by the passed address.
      */
     function balanceOf(address _owner)
-    constant
-    returns (uint256 balance)
+        constant
+        returns (uint256 balance)
     {
         return balances[_owner];
     }
@@ -104,10 +104,10 @@ contract SLOTToken is ERC20, Ownable {
      * @param _value uint256 the amout of tokens to be transfered
      */
     function transferFrom(address _from, address _to, uint256 _value)
-    afterCrowdsale
-    returns (bool)
+        afterCrowdsale
+        returns (bool)
     {
-        if(now < mLockEndTime) {
+        if (now < mLockEndTime) {
             increaseLiquidBalance(_to, _value);
         }
 
@@ -130,8 +130,8 @@ contract SLOTToken is ERC20, Ownable {
      * @param _value The amount of tokens to be spent.
      */
     function approve(address _spender, uint256 _value)
-    afterCrowdsale
-    returns (bool)
+        afterCrowdsale
+        returns (bool)
     {
         // To change the approve amount you first have to reduce the addresses`
         //  allowance to zero by calling `approve(_spender, 0)` if it is not
@@ -139,7 +139,7 @@ contract SLOTToken is ERC20, Ownable {
         //  https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
         require((_value == 0) || (allowed[msg.sender][_spender] == 0));
 
-        if(now < mLockEndTime) {
+        if (now < mLockEndTime) {
             uint256 allowedOriginal = allowed[msg.sender][_spender];
             if (_value == 0) {
                 increaseLiquidBalance(msg.sender, allowedOriginal);
@@ -160,8 +160,8 @@ contract SLOTToken is ERC20, Ownable {
      * @return A uint256 specifing the amount of tokens still avaible for the spender.
      */
     function allowance(address _owner, address _spender)
-    constant
-    returns (uint256 remaining)
+        constant
+        returns (uint256 remaining)
     {
         return allowed[_owner][_spender];
     }
@@ -174,9 +174,9 @@ contract SLOTToken is ERC20, Ownable {
      * Based on code by Zeppelin MintableToken
      */
     function mint(address _to, uint256 _amount)
-    onlyOwner
-    mintingNotFinished
-    returns (bool)
+        onlyOwner
+        mintingNotFinished
+        returns (bool)
     {
         totalSupply = totalSupply.add(_amount);
         balances[_to] = balances[_to].add(_amount);
@@ -193,8 +193,8 @@ contract SLOTToken is ERC20, Ownable {
      * Based on code by Zeppelin MintableToken
      */
     function finishMinting()
-    onlyOwner
-    returns (bool)
+        onlyOwner
+        returns (bool)
     {
         mMintingFinished = true;
         MintFinished();
@@ -208,8 +208,8 @@ contract SLOTToken is ERC20, Ownable {
      * @return An uint256 representing the amount owned by the passed address.
      */
     function liquidBalanceOf(address _owner)
-    constant
-    returns (uint256 liquidBalance)
+        constant
+        returns (uint256 liquidBalance)
     {
         return liquidBalances[_owner];
     }
@@ -225,20 +225,20 @@ contract SLOTToken is ERC20, Ownable {
      * @param _value The amount of liquid balance to be transferred.
      */
     function transferLiquidBalances(address _from, address _to, uint256 _value)
-    internal
+        internal
     {
         decreaseLiquidBalance(_from, _value);
         increaseLiquidBalance(_to, _value);
     }
 
     function decreaseLiquidBalance(address _target, uint256 _value)
-    internal
+        internal
     {
         liquidBalances[_target] = liquidBalances[_target].sub(_value);
     }
 
     function increaseLiquidBalance(address _target, uint256 _value)
-    internal
+        internal
     {
         if (liquidBalances[_target].add(_value) > LOCKUP_LIMIT_AMOUNT) {
             liquidBalances[_target] = LOCKUP_LIMIT_AMOUNT;
