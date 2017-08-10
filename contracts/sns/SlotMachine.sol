@@ -4,7 +4,6 @@ import 'zeppelin-solidity/contracts/ownership/Ownable.sol';
 
 contract SlotMachine is Ownable {
     bool public mAvailable;
-    bool public mBankrupt;
     address public mPlayer;
     uint16 public mDecider;
     uint public mMinBet;
@@ -12,9 +11,6 @@ contract SlotMachine is Ownable {
     uint16 public mMaxPrize;
     bytes16 public mName;
 
-    bool public mIsGamePlaying;
-
-    uint public bankerBalance;
     uint public playerBalance;
 
     bytes32[3] public previousPlayerSeed;
@@ -25,45 +21,47 @@ contract SlotMachine is Ownable {
     uint[24] public payTable;
     uint8 public numOfPayLine;
 
-    struct Game {
-        uint reward;
-        uint info;
+    uint[3] public mGameInfo;
 
-        /*
-          structure of uint info
+    /*structure of uint mGameInfo
 
-          info = bet + lines + readyChecker
+    mGameInfo = bet + lines + readyChecker
 
-          Base Condition
-          1. bet >= 100 wei
-          2. bet % 100 == 0
-          3. 1 <= lines <= 20
-          4. each method initGameForPlayer, setBankerSeed, setPlayerSeed
-            sets (readyChecker += 20)
+    Base Condition
+    1. bet >= 100 wei
+    2. bet % 100 == 0
+    3. 1 <= lines <= 20
+    4. each method initGameForPlayer, setBankerSeed, setPlayerSeed
+      sets (readyChecker += 20)
+    5. After gaemConfirmed, it stores the (reward + 1) of the round
 
-          If parameters are properly given,
-            info shoud be in form of
-            100000000000000 (bet)
-          +              10 (lines)
-          +              20 (readyChecker for initGameForPlayer)
-          +              20 (readyChecker for setBankerSeed)
-          +              20 (readyChecker for setPlayerSeed)
-          ------------------
-            100000000000070 => info
-        */
+    If parameters are properly given,
+      info shoud be in form of
+      100000000000000 (bet)
+    +            1000 (lines * 100)
+    +              10 (readyChecker for initGameForPlayer)
+    +              20 (readyChecker for setBankerSeed)
+    +              40 (readyChecker for setPlayerSeed)
+    ------------------
+      100000000001070 => mGameInfo
+
+    e.g)  200000000001540 => mGameInfo
+          200000000000000 => bet
+                     1500 => lines * 100 => lines = 15
+                       50 => ready for initGameForPlayer & setPlayerSeed,
+                             not ready for setBankerSeed
+
+*/
+
+    function bankerBalance() constant returns (uint) {
+        return this.balance - playerBalance;
     }
 
-    Game[3] public mGame;
     /*
         MODIFIERS
     */
     modifier onlyAvailable() {
         require(mAvailable);
-        _;
-    }
-
-    modifier notBankrupt() {
-        require(!mBankrupt);
         _;
     }
 
@@ -77,10 +75,6 @@ contract SlotMachine is Ownable {
         _;
     }
 
-    modifier notPlaying() {
-        require(!mIsGamePlaying);
-        _;
-    }
     /*
         EVENTS
     */
@@ -97,12 +91,10 @@ contract SlotMachine is Ownable {
     event gameConfirmed(uint reward, uint8 idx);
 
     function () payable {
-      if (msg.sender == owner || tx.origin == owner) {
-        bankerBalance += msg.value;
-      } else if(msg.sender == mPlayer) {
-        playerBalance += msg.value;
-      }
-
+        require(msg.sender == mPlayer || msg.sender == owner);
+        if (msg.sender == mPlayer) {
+            playerBalance += msg.value;
+        }
     }
     /*
         CONSTRUCTOR
@@ -116,12 +108,9 @@ contract SlotMachine is Ownable {
         mDecider = _decider;
         mPlayer = 0x0;
         mAvailable = true;
-        mBankrupt = false;
         mMinBet = _minBet;
         mMaxBet = _maxBet;
         mMaxPrize = _maxPrize;
-        mIsGamePlaying = false;
-        bankerBalance = msg.value;
 
         numOfPayLine = _numOfPayLine;
         initialBankerSeedReady = false;
@@ -164,17 +153,14 @@ contract SlotMachine is Ownable {
     }
 
     function leave()
-        onlyPlayer
     {
-        require(mGame[0].info == 0 && mGame[1].info == 0 && mGame[2].info == 0);
+        require(msg.sender == mPlayer || msg.sender == owner);
 
-        msg.sender.transfer(playerBalance);
+        mPlayer.transfer(playerBalance);
         playerLeft(mPlayer, playerBalance);
         playerBalance = 0;
         mAvailable = true;
-        mBankrupt = false;
         mPlayer = 0x0;
-        mIsGamePlaying = false;
         initialBankerSeedReady = false;
         initialPlayerSeedReady = false;
     }
@@ -182,24 +168,27 @@ contract SlotMachine is Ownable {
     function shutDown()
         notOccupied
         onlyAvailable
-        notPlaying
     {
         selfdestruct(owner);
     }
 
     function initGameForPlayer(uint _bet, uint8 _lines, uint8 _idx)
         onlyPlayer
-        notBankrupt
     {
         require(_bet >= mMinBet && _bet <= mMaxBet && (_bet % 100 == 0) && _lines <= 20);
         require(_bet * _lines <= playerBalance);
+        require(initialPlayerSeedReady && initialBankerSeedReady);
 
-        mGame[_idx].info += (_bet + _lines + 20);
-        uint betlines = mGame[_idx].info;
+        if(mGameInfo[_idx] % 10 == 1) {
+            mGameInfo[_idx] = (_bet + uint(_lines) * 100 + 10);
+        } else {
+            mGameInfo[_idx] += (_bet + uint(_lines) * 100 + 10);
+        }
 
+        uint betlines = mGameInfo[_idx];
         gameInitialized(mPlayer, _bet, _lines, _idx);
 
-        if ((betlines % 100) >= 61 && (betlines % 100) <= 80) {
+        if ((betlines % 100) == 70) {
           confirmGame(_idx);
         }
 
@@ -208,16 +197,22 @@ contract SlotMachine is Ownable {
     function setBankerSeed(bytes32 _bankerSeed, uint8 _idx)
         onlyOwner
     {
-        require (previousBankerSeed[_idx] == sha3(_bankerSeed));
+        require(previousBankerSeed[_idx] == sha3(_bankerSeed));
+        require(initialPlayerSeedReady && initialBankerSeedReady);
 
         previousBankerSeed[_idx] = _bankerSeed;
 
         bankerSeedSet(_bankerSeed, _idx);
 
-        mGame[_idx].info += 20;
-        uint betlines = mGame[_idx].info;
+        if(mGameInfo[_idx] % 10 == 1) {
+            mGameInfo[_idx] = 20;
+        } else {
+            mGameInfo[_idx] += 20;
+        }
 
-        if ((betlines % 100) >= 61 && (betlines % 100) <= 80) {
+        uint betlines = mGameInfo[_idx];
+
+        if ((betlines % 100) == 70) {
           confirmGame(_idx);
         }
 
@@ -227,16 +222,22 @@ contract SlotMachine is Ownable {
     function setPlayerSeed(bytes32 _playerSeed, uint8 _idx)
         onlyPlayer
     {
-        require (previousPlayerSeed[_idx] == sha3(_playerSeed));
+        require(previousPlayerSeed[_idx] == sha3(_playerSeed));
+        require(initialPlayerSeedReady && initialBankerSeedReady);
 
         previousPlayerSeed[_idx] = _playerSeed;
 
         playerSeedSet(_playerSeed, _idx);
 
-        mGame[_idx].info += 20;
-        uint betlines = mGame[_idx].info;
+        if(mGameInfo[_idx] % 10 == 1) {
+            mGameInfo[_idx] = 40;
+        } else {
+            mGameInfo[_idx] += 40;
+        }
 
-        if ((betlines % 100) >= 61 && (betlines % 100) <= 80) {
+        uint betlines = mGameInfo[_idx];
+
+        if ((betlines % 100) == 70) {
           confirmGame(_idx);
         }
 
@@ -249,10 +250,10 @@ contract SlotMachine is Ownable {
         uint reward = 0;
         bytes32 rnseed = sha3(previousBankerSeed[_idx] ^ previousPlayerSeed[_idx]);
         uint randomNumber = uint(rnseed) % 10000000000;
-        uint8 numOfLines = uint8((mGame[_idx].info % 100) - 60);
-        uint bet = mGame[_idx].info - numOfLines - 60;
+        uint8 numOfLines = uint8((mGameInfo[_idx] % 10000)/100);
+        uint bet = (mGameInfo[_idx]/10000)*10000;
         uint8 numOfPayLines = numOfPayLine;
-        uint bankerbalance = bankerBalance;
+        uint bankerbalance = this.balance - playerBalance;
         uint[] memory cmp = new uint[](numOfPayLines*2);
 
         for(uint8 k=0; k<numOfPayLines; k++){
@@ -275,10 +276,8 @@ contract SlotMachine is Ownable {
             reward = bankerbalance;
         }
 
-        mGame[_idx].reward = reward;
-        mGame[_idx].info = 0;
+        mGameInfo[_idx] = reward + 1;
 
-        bankerBalance = bankerbalance - reward + bet * numOfLines;
         playerBalance = playerBalance + reward - bet * numOfLines;
 
         gameConfirmed(reward, _idx);
@@ -286,6 +285,6 @@ contract SlotMachine is Ownable {
     }
 
     function getInfo() constant returns (address, address, bytes16, uint16, uint, uint, uint16, uint) {
-        return (mPlayer, owner, mName, mDecider, mMinBet, mMaxBet, mMaxPrize, bankerBalance);
+        return (mPlayer, owner, mName, mDecider, mMinBet, mMaxBet, mMaxPrize, this.balance - playerBalance);
     }
 }

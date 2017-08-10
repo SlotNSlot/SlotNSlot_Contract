@@ -1,8 +1,6 @@
 pragma solidity ^0.4.0;
 
-//import "./SlotLib.sol";
 import "./SlotMachineStorage.sol";
-
 import "./LibInterface.sol";
 
 contract SlotMachineManager {
@@ -31,10 +29,10 @@ contract SlotMachineManager {
         return slotmachineStorage;
     }
 
-
     function createSlotMachine(uint16 _decider, uint _minBet, uint _maxBet, uint16 _maxPrize, bytes16 _name)
         returns (address)
     {
+        require(_minBet >= 10000);
         address newslot;
         newslot = slotmachineStorage.createSlotMachine(msg.sender, _decider, _minBet, _maxBet, _maxPrize, _name);
         return newslot;

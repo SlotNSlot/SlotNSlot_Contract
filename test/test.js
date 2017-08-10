@@ -25,12 +25,13 @@ contract('TestProxyLibrary', () => {
       const initialBankerBalance = web3.toWei(10,"ether");
       const initialPlayerBalance = web3.toWei(10,"ether");
       const gameBetting = web3.toWei(0.001,"ether");
-      const gamePlayNum = 100;
+      const gamePlayNum = 200;
       const gamePlayLine = 20;
 
       var slotManager, slotStorage, slot, slotaddr;
       var dispatcherStorage;
       var bankerBalance, playerBalance;
+      var bankerBalanceBefore, playerBalanceBefore;
 
       var gasforCreating = 0;
       var gasforPlayerSeedInitializing = 0;
@@ -68,10 +69,10 @@ contract('TestProxyLibrary', () => {
         }).then(result => {
           console.log('Player seed is set, gasUsed : ', result);
           gasforPlayerSeedSetting += result;
-          return slot.mGame(idx);
+          return slot.mGameInfo(idx);
         }).then(result => {
-          console.log('player initial betting : ', bet * line, 'player reward : ',result[0].valueOf().toString());
-          console.log('player final prize : ', result[0] - bet * line);
+          console.log('player initial betting : ', bet * line, 'player reward : ',result.valueOf().toString());
+          console.log('player final prize : ', result - bet * line);
           return printBalance();
         })
       }
@@ -106,14 +107,14 @@ contract('TestProxyLibrary', () => {
         assert.equal(result, 0, 'There are already some slotmachines in storage');
         console.log('Initializing test completed successfully');
         console.log('Creating test start');
-        slotManager.createSlotMachine(100, 1, web3.toWei(1,"ether"), 1000, 'test1',{gas:4000000});
+        slotManager.createSlotMachine(100, 10000, web3.toWei(1,"ether"), 1000, 'test1',{gas:4000000});
         return slotStorage.totalNumOfSlotMachine();
       })
       .then(result => {
         assert.equal(result, 1, 'creating test1 failed');
         console.log('Slotmachine1 is created successfully');
-        slotManager.createSlotMachine(125, 1, web3.toWei(1,"ether"), 2000, 'test2',{gas:4000000});
-        return slotManager.createSlotMachine.estimateGas(125, 1, web3.toWei(1,"ether"), 2000, 'test2',{gas:4000000});
+        slotManager.createSlotMachine(125, 10000, web3.toWei(1,"ether"), 2000, 'test2',{gas:4000000});
+        return slotManager.createSlotMachine.estimateGas(125, 10000, web3.toWei(1,"ether"), 2000, 'test2',{gas:4000000});
       })
       .then(result => {
         console.log('Creating test completed successfully, gasUsed : ', result);
@@ -130,6 +131,8 @@ contract('TestProxyLibrary', () => {
         return slot.getInfo();
       }).then(slotinfo => {
         console.log(slotinfo);
+        bankerBalanceBefore = web3.fromWei(web3.eth.getBalance(user1),"ether");
+        playerBalanceBefore = web3.fromWei(web3.eth.getBalance(user2),"ether");
         slot.occupy(playerSeeds,{from:user2,value:initialPlayerBalance,gas:1000000});
         return slot.occupy.estimateGas(playerSeeds,{from:user2,value:10000000});
       }).then(result => {
@@ -153,6 +156,9 @@ contract('TestProxyLibrary', () => {
         return slot.shutDown.estimateGas({gas:1000000});
       }).then(result => {
         console.log('banker closed the slot, gasUsed : ', result);
+        console.log('banker wallet balance before : ', bankerBalanceBefore);
+        console.log('player wallet balance before: ',playerBalanceBefore);
+
         console.log('banker wallet balance : ', web3.fromWei(web3.eth.getBalance(user1),"ether"));
         console.log('player wallet balance : ',web3.fromWei(web3.eth.getBalance(user2),"ether"));
 

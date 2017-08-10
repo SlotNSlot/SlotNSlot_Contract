@@ -1,5 +1,26 @@
-#SlotMachine API 0.23v
+#SlotMachine API 0.26v
+---
+0.26
 
+SlotMachine
+  - game struct removed
+  - mGameInfo added
+  
+---
+0.25
+
+SlotMachine
+  - mIsGamePlaying deleted
+  - variable bankerBalance deleted
+  - method *bankerBalance* added
+
+---
+0.24
+
+SlotMachine
+  - mBankrupt deleted
+  - banker(owner) can call *leave* for kick player
+  - game struct explanation added
 ---
 0.23  
 SlotMachine
@@ -247,15 +268,12 @@ SlotMachine
     true if slot is not occupied by player  
     false if slot is occupied
 
-
-  - bool public mBankrupt
-
   - address mPlayer
 
     address of current player  
     if slot is not occupied, mPlayer = '0x0'    
 
-  - uint mDecider
+  - uint16 mDecider
 
     hit rate of slotmachine * 1000  
     e.g) hit rate : 15%(0.15) => mDecider : 150
@@ -268,16 +286,11 @@ SlotMachine
 
     maxBet of slotmachine(wei)
 
-  - uint mMaxPrize
-
-  - uint bankerBalance
-
-    banker's balance in slotmachine (wei)
+  - uint16 mMaxPrize
 
   - uint playerBalance
 
     player's balance in slotmachine (wei)
-
 
   - bool public initialPlayerSeedReady
 
@@ -304,6 +317,38 @@ SlotMachine
     struct Game {
         uint reward;
         uint info;
+
+        /*
+          structure of uint info
+
+          info = bet + lines + readyChecker
+
+          Base Condition
+          1. bet >= 100 wei
+          2. bet % 100 == 0
+          3. 1 <= lines <= 20
+          4. each method initGameForPlayer, setBankerSeed, setPlayerSeed
+            sets (readyChecker += 20)
+
+          If parameters are properly given,
+            info shoud be in form of
+            100000000000000 (bet)
+          +            1000 (lines * 100)
+          +              10 (readyChecker for initGameForPlayer)
+          +              20 (readyChecker for setBankerSeed)
+          +              40 (readyChecker for setPlayerSeed)
+          ------------------
+            100000000001070 => info
+
+          e.g)  200000000001540 => info
+                200000000000000 => bet
+                           1500 => lines * 100 => lines = 15
+                             50 => ready for initGameForPlayer & setPlayerSeed,
+                                   not ready for setBankerSeed
+
+
+        */
+
     }
     ```
 
@@ -364,8 +409,8 @@ SlotMachine
 
   - leave()  
 
-    onlyPlayer  
-    access : onlyPlayer  
+    access : Player or Banker
+
     player leaves the game  
     give back the balance to player  
     event : playerLeft
