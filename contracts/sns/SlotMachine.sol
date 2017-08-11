@@ -50,8 +50,7 @@ contract SlotMachine is Ownable {
                      1500 => lines * 100 => lines = 15
                        50 => ready for initGameForPlayer & setPlayerSeed,
                              not ready for setBankerSeed
-
-*/
+    */
 
     function bankerBalance() constant returns (uint) {
         return this.balance - playerBalance;
@@ -272,8 +271,8 @@ contract SlotMachine is Ownable {
         }
         reward = reward * bet;
 
-        if (reward >= bankerbalance) {
-            reward = bankerbalance;
+        if (reward >= bankerbalance + bet * numOfLines) {
+            reward = bankerbalance + bet * numOfLines;
         }
 
         mGameInfo[_idx] = reward + 1;

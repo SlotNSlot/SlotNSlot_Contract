@@ -1,11 +1,16 @@
 #SlotMachine API 0.26v
 ---
+0.27
+
+SlotMachine
+  - calculating reward bug fixed
+  
+---
 0.26
 
 SlotMachine
-  - game struct removed
+  - game struct removed, Game[3] mGame removed
   - mGameInfo added
-  
 ---
 0.25
 
@@ -308,54 +313,42 @@ SlotMachine
 
     stores bankerseed of the previous game
 
+  - uint[3] public mGameInfo
 
-  - Game[3] mGame;
-
-    stores game information for each round  
-
-    ```solidity
-    struct Game {
-        uint reward;
-        uint info;
-
-        /*
-          structure of uint info
-
-          info = bet + lines + readyChecker
-
-          Base Condition
-          1. bet >= 100 wei
-          2. bet % 100 == 0
-          3. 1 <= lines <= 20
-          4. each method initGameForPlayer, setBankerSeed, setPlayerSeed
-            sets (readyChecker += 20)
-
-          If parameters are properly given,
-            info shoud be in form of
-            100000000000000 (bet)
-          +            1000 (lines * 100)
-          +              10 (readyChecker for initGameForPlayer)
-          +              20 (readyChecker for setBankerSeed)
-          +              40 (readyChecker for setPlayerSeed)
-          ------------------
-            100000000001070 => info
-
-          e.g)  200000000001540 => info
-                200000000000000 => bet
-                           1500 => lines * 100 => lines = 15
-                             50 => ready for initGameForPlayer & setPlayerSeed,
-                                   not ready for setBankerSeed
-
-
-        */
-
-    }
     ```
+    structure of uint mGameInfo
 
+    mGameInfo = bet + lines + readyChecker
+
+    Base Condition
+    1. bet >= 100 wei
+    2. bet % 100 == 0
+    3. 1 <= lines <= 20
+    4. each method initGameForPlayer, setBankerSeed, setPlayerSeed
+      sets (readyChecker += 20)
+    5. After gaemConfirmed, it stores the (reward + 1) of the round
+
+    If parameters are properly given,
+      info shoud be in form of
+      100000000000000 (bet)
+    +            1000 (lines * 100)
+    +              10 (readyChecker for initGameForPlayer)
+    +              20 (readyChecker for setBankerSeed)
+    +              40 (readyChecker for setPlayerSeed)
+    ------------------
+      100000000001070 => mGameInfo
+
+    e.g)  200000000001540 => mGameInfo
+          200000000000000 => bet
+                     1500 => lines * 100 => lines = 15
+                       50 => ready for initGameForPlayer & setPlayerSeed,
+                             not ready for setBankerSeed
+
+    ```
   - all public variables have getter function
     ```js
       //get game informations in struct Game
-      slot.mGames(0);
+      slot.mGameInfo(0);
 
       //get player balance
       slot.playerBalance();
