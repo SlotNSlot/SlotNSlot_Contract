@@ -161,6 +161,17 @@ contract SlotMachine is Ownable {
         mPlayer = 0x0;
         initialBankerSeedReady = false;
         initialPlayerSeedReady = false;
+
+        previousBankerSeed[0] = 0x0;
+        previousBankerSeed[1] = 0x0;
+        previousBankerSeed[2] = 0x0;
+        previousPlayerSeed[0] = 0x0;
+        previousPlayerSeed[1] = 0x0;
+        previousPlayerSeed[2] = 0x0;
+        mGameInfo[0] = 0;
+        mGameInfo[1] = 0;
+        mGameInfo[2] = 0;
+
     }
 
     function shutDown()
