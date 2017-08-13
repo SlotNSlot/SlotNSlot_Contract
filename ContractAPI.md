@@ -1,10 +1,18 @@
-#SlotMachine API 0.26v
+#SlotMachine API 0.28v
+
+---
+0.28
+
+SlotMachine
+  - gameConfirmed event changed  
+    gameConfirmed(uint reward, uint8 idx) => gameConfirmed(uint reward, uint8 idx, bytes32 randomSeed)
+
 ---
 0.27
 
 SlotMachine
   - calculating reward bug fixed
-  
+
 ---
 0.26
 
@@ -447,9 +455,10 @@ SlotMachine
     - idx : index of sha3chain
 
 
-  - gameConfirmed(uint reward, uint8 idx)
+  - gameConfirmed(uint reward, uint8 idx, bytes32 randomSeed)
     - reward : final reward for player  
     - idx : index of sha3chain
+    - randomSeed : randomSeed of current game
 
 
 

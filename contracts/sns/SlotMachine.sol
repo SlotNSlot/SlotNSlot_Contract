@@ -87,7 +87,7 @@ contract SlotMachine is Ownable {
     event bankerSeedSet(bytes32 bankerSeed, uint8 idx);
     event playerSeedSet(bytes32 playerSeed, uint8 idx);
 
-    event gameConfirmed(uint reward, uint8 idx);
+    event gameConfirmed(uint reward, uint8 idx, bytes32 randomSeed);
 
     function () payable {
         require(msg.sender == mPlayer || msg.sender == owner);
@@ -290,7 +290,7 @@ contract SlotMachine is Ownable {
 
         playerBalance = playerBalance + reward - bet * numOfLines;
 
-        gameConfirmed(reward, _idx);
+        gameConfirmed(reward, _idx, rnseed);
 
     }
 
