@@ -87,7 +87,7 @@ contract SlotMachine is Ownable {
     event bankerSeedSet(bytes32 bankerSeed, uint8 idx);
     event playerSeedSet(bytes32 playerSeed, uint8 idx);
 
-    event gameConfirmed(uint reward, uint8 idx);
+    event gameConfirmed(uint reward, uint8 idx, bytes32 randomSeed);
 
     function () payable {
         require(msg.sender == mPlayer || msg.sender == owner);
@@ -161,6 +161,17 @@ contract SlotMachine is Ownable {
         mPlayer = 0x0;
         initialBankerSeedReady = false;
         initialPlayerSeedReady = false;
+
+        previousBankerSeed[0] = 0x0;
+        previousBankerSeed[1] = 0x0;
+        previousBankerSeed[2] = 0x0;
+        previousPlayerSeed[0] = 0x0;
+        previousPlayerSeed[1] = 0x0;
+        previousPlayerSeed[2] = 0x0;
+        mGameInfo[0] = 0;
+        mGameInfo[1] = 0;
+        mGameInfo[2] = 0;
+
     }
 
     function shutDown()
@@ -174,7 +185,7 @@ contract SlotMachine is Ownable {
         onlyPlayer
     {
         require(_bet >= mMinBet && _bet <= mMaxBet && (_bet % 100 == 0) && _lines <= 20);
-        require(_bet * _lines <= playerBalance);
+        require(_bet * _lines <= playerBalance && this.bankerBalance() != 0);
         require(initialPlayerSeedReady && initialBankerSeedReady);
 
         if (mGameInfo[_idx] % 10 == 1) {
@@ -279,7 +290,7 @@ contract SlotMachine is Ownable {
 
         playerBalance = playerBalance + reward - bet * numOfLines;
 
-        gameConfirmed(reward, _idx);
+        gameConfirmed(reward, _idx, rnseed);
 
     }
 
