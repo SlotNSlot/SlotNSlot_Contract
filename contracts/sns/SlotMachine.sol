@@ -185,7 +185,7 @@ contract SlotMachine is Ownable {
         onlyPlayer
     {
         require(_bet >= mMinBet && _bet <= mMaxBet && (_bet % 100 == 0) && _lines <= 20);
-        require(_bet * _lines <= playerBalance);
+        require(_bet * _lines <= playerBalance && this.bankerBalance() != 0);
         require(initialPlayerSeedReady && initialBankerSeedReady);
 
         if (mGameInfo[_idx] % 10 == 1) {
