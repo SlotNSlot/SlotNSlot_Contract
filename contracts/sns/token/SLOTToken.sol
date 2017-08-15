@@ -1,4 +1,4 @@
-pragma solidity ^0.4.0;
+pragma solidity ^0.4.11;
 
 
 import "zeppelin-solidity/contracts/math/SafeMath.sol";
@@ -18,18 +18,26 @@ contract SLOTToken is ERC20, Ownable {
     uint public constant decimals = 18;
 
     /**
-     * SLOT transfer will be locked until the crowd sale ends.
-     * After crowd sale ends, SLOT exceeding LOCKUP_LIMIT_AMOUNT will be locked for 100 days.
+     * SLOT transfer will be locked until the crowdsale end date + 7 days.
+     * After crowd sale ends, SLOT exceeding WHALE_LOCKUP_LIMIT_AMOUNT will be locked for 30 days.
      */
-    uint256 public constant LOCKUP_LIMIT_AMOUNT = 10000000000000000000000000;
+    uint256 public constant TRANSFER_LOCKUP_PERIOD = 7 days;
 
-    uint256 public constant LOCKUP_PERIOD = 100 days;
+    uint256 public constant WHALE_LOCKUP_LIMIT_AMOUNT = 10000000 ether;
+
+    uint256 public constant WHALE_LOCKUP_PERIOD = 30 days;
+
+    uint256 public constant SLOT_TEAM_LOCKUP_PERIOD = 1 years;
 
     bool public mMintingFinished;
 
-    uint256 public mCrowdsaleEndTime;
+    uint256 public mTransferLockupEndTime;
 
-    uint256 public mLockEndTime;
+    uint256 public mWhaleLockupEndTime;
+
+    uint256 public mSlotTeamLockupEndTime;
+
+    address public mMultisigWallet;
 
     mapping (address => mapping (address => uint256)) allowed;
     mapping (address => uint256) balances;
@@ -49,18 +57,21 @@ contract SLOTToken is ERC20, Ownable {
         _;
     }
 
-    modifier afterCrowdsale() {
-        require(now > mCrowdsaleEndTime);
+    modifier afterTransferLockup() {
+        require(now > mTransferLockupEndTime);
+        require(msg.sender != mMultisigWallet || now > mSlotTeamLockupEndTime);
         _;
     }
 
     /*
      * @dev constructor of SLOT Token
      */
-    function SLOTToken(address _minter, uint256 _crowdsaleEndTime) {
+    function SLOTToken(address _minter, uint256 _crowdsaleEndTime, address _multisigWallet) {
         owner = _minter;
-        mCrowdsaleEndTime = _crowdsaleEndTime;
-        mLockEndTime = mCrowdsaleEndTime + LOCKUP_PERIOD;
+        mTransferLockupEndTime = _crowdsaleEndTime + TRANSFER_LOCKUP_PERIOD;
+        mWhaleLockupEndTime = _crowdsaleEndTime + WHALE_LOCKUP_PERIOD;
+        mSlotTeamLockupEndTime = _crowdsaleEndTime + SLOT_TEAM_LOCKUP_PERIOD;
+        mMultisigWallet = _multisigWallet;
 
         mMintingFinished = false;
     }
@@ -71,10 +82,10 @@ contract SLOTToken is ERC20, Ownable {
      * @param _value The amount to be transferred.
      */
     function transfer(address _to, uint256 _value)
-        afterCrowdsale
+        afterTransferLockup
         returns (bool)
     {
-        if (now < mLockEndTime) {
+        if (now < mWhaleLockupEndTime) {
             transferLiquidBalances(msg.sender, _to, _value);
         }
 
@@ -104,10 +115,10 @@ contract SLOTToken is ERC20, Ownable {
      * @param _value uint256 the amout of tokens to be transfered
      */
     function transferFrom(address _from, address _to, uint256 _value)
-        afterCrowdsale
+        afterTransferLockup
         returns (bool)
     {
-        if (now < mLockEndTime) {
+        if (now < mWhaleLockupEndTime) {
             increaseLiquidBalance(_to, _value);
         }
 
@@ -130,7 +141,7 @@ contract SLOTToken is ERC20, Ownable {
      * @param _value The amount of tokens to be spent.
      */
     function approve(address _spender, uint256 _value)
-        afterCrowdsale
+        afterTransferLockup
         returns (bool)
     {
         // To change the approve amount you first have to reduce the addresses`
@@ -139,7 +150,7 @@ contract SLOTToken is ERC20, Ownable {
         //  https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
         require((_value == 0) || (allowed[msg.sender][_spender] == 0));
 
-        if (now < mLockEndTime) {
+        if (now < mWhaleLockupEndTime) {
             uint256 allowedOriginal = allowed[msg.sender][_spender];
             if (_value == 0) {
                 increaseLiquidBalance(msg.sender, allowedOriginal);
@@ -240,8 +251,8 @@ contract SLOTToken is ERC20, Ownable {
     function increaseLiquidBalance(address _target, uint256 _value)
         internal
     {
-        if (liquidBalances[_target].add(_value) > LOCKUP_LIMIT_AMOUNT) {
-            liquidBalances[_target] = LOCKUP_LIMIT_AMOUNT;
+        if (liquidBalances[_target].add(_value) > WHALE_LOCKUP_LIMIT_AMOUNT) {
+            liquidBalances[_target] = WHALE_LOCKUP_LIMIT_AMOUNT;
         } else {
             liquidBalances[_target] = liquidBalances[_target].add(_value);
         }

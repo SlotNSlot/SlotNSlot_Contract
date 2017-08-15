@@ -1,11 +1,11 @@
 {
     "language": "Solidity",
     "sources": {
-        "SLOTToken.sol": {
-            "urls": ["${__WORKSPACE__}/contracts/sns/token/SLOTToken.sol"]
+        "MultiSigWallet.sol": {
+            "urls": ["${__WORKSPACE__}/contracts/sns/token/MultiSigWallet.sol"]
         },
-        "SLOTCrowdsale.sol": {
-            "urls": ["${__WORKSPACE__}/contracts/sns/token/SLOTCrowdssale.sol"]
+        "SlotNSlotICOWallet.sol": {
+            "urls": ["${__WORKSPACE__}/contracts/sns/token/SlotNSlotICOWallet.sol"]
         }
     },
     // Optional
