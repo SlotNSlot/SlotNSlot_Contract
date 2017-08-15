@@ -1,4 +1,4 @@
-pragma solidity ^0.4.0;
+pragma solidity ^0.4.11;
 
 
 import './SLOTToken.sol';
@@ -11,13 +11,20 @@ import 'zeppelin-solidity/contracts/math/SafeMath.sol';
 contract SLOTCrowdsale {
 
     /**
-     *  The funding hard cap is 50000 eth originally, 
-     *  but we set this into 100000 eth to prevent unexpected problem.
+     *  The funding hard cap is 40000 ETH
      */
-    uint public constant FUNDING_HARD_CAP = 100000000000000000000000;
+    uint public constant FUNDING_HARD_CAP = 40000 ether;
 
     /**
-     *  If a investor funds until (mStartTime + EARLY_BIRD_DURATION),
+     *  Start and end date of ICO
+     *  Start date : Aug 20th, 2017, AM 08:00 (1503216000)
+     *  End date : Sep 17th, 2017, AM 08:00 (1505635200)
+     */
+    uint public constant START_DATE_TIMESTAMP = 1503216000;
+    uint public constant END_DATE_TIMESTAMP = 1505635200;
+
+    /**
+     *  If a investor funds until (START_DATE_TIMESTAMP + EARLY_BIRD_DURATION),
      *  he/she will get 12000 SLOT / 1 eth.
      */
     uint public constant EARLY_BIRD_DURATION = 1 days;
@@ -45,12 +52,6 @@ contract SLOTCrowdsale {
     SLOTToken public mSLOTToken;
 
     /**
-     *  Start and end time of this crowdsale
-     */
-    uint public mStartTime;
-    uint public mEndTime;
-
-    /**
      *  The amount of ether raised and SLOT sold
      */
     uint public mEtherRaised;
@@ -58,13 +59,14 @@ contract SLOTCrowdsale {
 
     bool public mPaused;
 
-    modifier isCrowdfundPeriod() {
-        require(now >= mStartTime && now < mEndTime);
+    modifier afterCroudfundPeriod() {
+        require(now > END_DATE_TIMESTAMP);
         _;
     }
 
-    modifier afterCroudfundPeriod() {
-        require(now > mEndTime);
+    modifier isCrowdsaleGoesOn() {
+        require(now >= START_DATE_TIMESTAMP && now < END_DATE_TIMESTAMP);
+        require(mEtherRaised <= FUNDING_HARD_CAP);
         _;
     }
 
@@ -81,12 +83,9 @@ contract SLOTCrowdsale {
     event Fund(address indexed _recipient, uint _amount);
     event CrowdsaleEnd();
 
-    function SLOTCrowdsale(address _multisigAddr, address _SLOTToken, uint _startTime, uint _endTime) {
+    function SLOTCrowdsale(address _multisigAddr, address _SLOTToken) {
         mMultisigAddr = _multisigAddr;
         mOwnerAddr = msg.sender;
-
-        mStartTime = _startTime;
-        mEndTime = _endTime;
 
         mSLOTToken = SLOTToken(_SLOTToken);
 
@@ -115,11 +114,11 @@ contract SLOTCrowdsale {
     constant
     returns (uint o_rate)
     {
-        if (now <= mStartTime + EARLY_BIRD_DURATION) {
+        if (now <= START_DATE_TIMESTAMP + EARLY_BIRD_DURATION) {
             return PRICE_EARLY_BIRD;
         }
 
-        if (now <= mEndTime) {
+        if (now <= END_DATE_TIMESTAMP) {
             return PRICE_NORMAL;
         } else {
             return 0;
@@ -141,7 +140,7 @@ contract SLOTCrowdsale {
 
     function()
     payable
-    isCrowdfundPeriod
+    isCrowdsaleGoesOn
     notPaused
     {
         require(msg.value != 0);

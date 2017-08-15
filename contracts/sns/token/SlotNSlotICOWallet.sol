@@ -1,14 +1,15 @@
 pragma solidity ^0.4.11;
 
+
 import "./MultiSigWallet.sol";
 
 
 contract SlotNSlotICOWallet is MultiSigWallet {
     /**
-     *  Ether which is funded from ICO can be withdrawn 10,000 ETH every year for 5 years.
+     *  Ether which is funded from ICO can be withdrawn 2,400 ETH every 90 days for 4 years.
      */
-    uint public constant LOCKUP_LIMIT_PERIOD = 5 years;
-    uint public constant LOCKUP_RESET_DURATION = 1 years;
+    uint public constant LOCKUP_LIMIT_PERIOD = 4 years;
+    uint public constant LOCKUP_RESET_DURATION = 90 days;
 
     uint public mYearlyLimit;
     uint public mStartYear;
